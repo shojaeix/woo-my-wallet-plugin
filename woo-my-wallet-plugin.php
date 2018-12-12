@@ -19,12 +19,12 @@ if( count($include_files)){
 register_activation_hook( __FILE__, 'wMyWallet_activation' );
 function wMyWallet_activation(){
 
+    global $wpdb;
     // create wallet transactions table if not exists
-    $transactions_table_name = $wpdb->prefix . "wMyWallet_transactions";
+    $transactions_table_name = $wpdb->prefix . wMyWallet_DBHelper::prefix . "transactions";
     $charset_collate = $wpdb->get_charset_collate();
 
-    $sql = "CREATE TABLE 
-    {$table_name1} 
+    $sql = "CREATE TABLE IF NOT EXISTS {$transactions_table_name} 
     (  `id` INT NOT NULL AUTO_INCREMENT ,
        `amount` INT UNSIGNED NOT NULL ,
        `type` VARCHAR(20) NOT NULL ,
@@ -42,7 +42,17 @@ function wMyWallet_activation(){
 // Deactivation
 register_deactivation_hook(__FILE__, 'wMyWallet_deactivation');
 function wMyWallet_deactivation(){
-    // todo | Remove wallet transactions table if user confirmed this
+    // todo | get confirm from user for delete table
+    
+    //  Remove wallet transactions table if user confirmed this
+    global $wpdb;
+    $transactions_table_name = $wpdb->prefix . wMyWallet_DBHelper::prefix . "transactions";
+    $charset_collate = $wpdb->get_charset_collate();
+
+    $sql = "DROP TABLE IF EXISTS {$transactions_table_name};";
+
+    $wpdb->query($sql);
+
 }
 
 
