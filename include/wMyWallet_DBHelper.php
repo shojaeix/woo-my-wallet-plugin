@@ -1,0 +1,59 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: Almasvareh
+ * Date: 12/12/2018
+ * Time: 14:37
+ */
+
+class wMyWallet_DBHelper
+{
+    private $wpdb;
+    private $instante;
+
+    public function __construct()
+    {
+        $this->wpdb();
+    }
+
+    /**
+     * save global wpdb object in $this object
+     */
+    private function wpdb()
+    {
+        if (!$this->wpdb instanceof wpdb) {
+            global $wpdb;
+            $this->wpdb = $wpdb;
+        }
+    }
+
+    /**
+     * @param $user_id
+     * @param $meta_key
+     * @param $meta_value
+     * @param bool $single_meta meta will replace with new value
+     * @param null $prev_value
+     */
+    public static function save_user_single_meta($user_id, $meta_key, $meta_value, $add_prefix = true)
+    {
+        if($add_prefix){
+            $meta_key = 'wMyWallet_' . $meta_key;
+        }
+        return update_user_meta($user_id, $meta_key, $meta_value);
+    }
+
+    /**
+     * @param $user_id
+     * @param $meta_key
+     * @param bool $single_meta
+     * @return mixed
+     */
+    public static function get_user_meta($user_id, $meta_key, $add_prefix = true)
+    {
+        if($add_prefix){
+            $meta_key = 'wMyWallet_' . $meta_key;
+        }
+        return get_user_meta($user_id, $meta_key, true);
+    }
+
+}
