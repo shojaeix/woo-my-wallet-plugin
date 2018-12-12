@@ -9,7 +9,10 @@
 class wMyWallet_DBHelper
 {
     private $wpdb;
-    private $instante;
+    /**
+     * @var wMyWallet_DBHelper
+     */
+    private static $instante;
 
     public function __construct()
     {
@@ -56,4 +59,24 @@ class wMyWallet_DBHelper
         return get_user_meta($user_id, $meta_key, true);
     }
 
+
+    public static function dbDelta(string $sql){
+
+        $instante = self::instante();
+        $wpdb = $instante->wpdb;
+
+
+        require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+        dbDelta( $sql );
+    }
+
+    private static function instante(){
+        if(self::$instante instanceof self){
+           return self::$instante;
+        }
+
+        self::$instante = new self();
+
+        return self::$instante;
+    }
 }
