@@ -35,7 +35,7 @@ function wMyWallet_activation(){
         PRIMARY KEY (`id`)
     ) $charset_collate;";
 
-    wMyWallet_DBHelper::dbDelta($sql);
+    wMyWallet_DBHelper::delta_query($sql);
 
 }
 
@@ -43,7 +43,7 @@ function wMyWallet_activation(){
 register_deactivation_hook(__FILE__, 'wMyWallet_deactivation');
 function wMyWallet_deactivation(){
     // todo | get confirm from user for delete table
-    
+
     //  Remove wallet transactions table if user confirmed this
     global $wpdb;
     $transactions_table_name = $wpdb->prefix . wMyWallet_DBHelper::prefix . "transactions";

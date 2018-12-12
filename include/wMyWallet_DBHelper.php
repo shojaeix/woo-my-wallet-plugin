@@ -8,6 +8,8 @@
 
 class wMyWallet_DBHelper
 {
+
+    const prefix = 'wMyWallet_';
     private $wpdb;
     /**
      * @var wMyWallet_DBHelper
@@ -60,14 +62,14 @@ class wMyWallet_DBHelper
     }
 
 
-    public static function dbDelta(string $sql){
+    public static function delta_query(string $sql){
 
         $instante = self::instante();
         $wpdb = $instante->wpdb;
 
 
         require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-        dbDelta( $sql );
+        return dbDelta( $sql );
     }
 
     private static function instante(){
