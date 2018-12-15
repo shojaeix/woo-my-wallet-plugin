@@ -31,4 +31,17 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
         return $dateTime->format('Y-m-d H:i:s');
         //return jdate('Y-m-d H:i:s')
     }
+
+    /**
+     * Require template from templates directory and pass $args array to it.
+     * @param $template_name
+     * @param array $args
+     * @throws Exception throw if template file not exists. template_name.php file should exist in templates directory.
+     */
+    function wMyWallet_render_template($template_name,array $args = []){
+        if(!is_file(wMyWallet_ROOT . '/templates/' . $template_name . '.php'))
+            throw new Exception('Template ' . $template_name . ' not found.');
+
+        require wMyWallet_ROOT . '/templates/' . $template_name . '.php';
+    }
 }
