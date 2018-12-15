@@ -6,4 +6,4 @@
  * Time: 11:09
  */
 
-define('wMyWallet_discount_title','تخفیف اعضای شبکه آزمایشگاهی توانا');
+define('wMyWallet_discount_title','کسر از کیف پول');
