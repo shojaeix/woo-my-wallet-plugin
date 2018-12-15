@@ -14,7 +14,7 @@ class wMyWallet_DBHelper
     /**
      * @var wMyWallet_DBHelper
      */
-    private static $instante;
+    private static $instante1 = null;
 
     public function __construct()
     {
@@ -26,10 +26,11 @@ class wMyWallet_DBHelper
      */
     private function wpdb()
     {
-        if (!$this->wpdb instanceof wpdb) {
+        if (!($this->wpdb instanceof wpdb)) {
             global $wpdb;
             $this->wpdb = $wpdb;
         }
+        return $this->wpdb;
     }
 
     /**
@@ -73,16 +74,21 @@ class wMyWallet_DBHelper
     }
 
     private static function instante(){
-        if(self::$instante instanceof self){
-           return self::$instante;
+        if(self::$instante1 instanceof wMyWallet_DBHelper){
+            return self::$instante1;
         }
 
-        self::$instante = new self();
+        self::$instante1 = new wMyWallet_DBHelper();
 
-        return self::$instante;
+        return self::$instante1;
     }
 
     public static function insert($table_name, array $atts){
-        return self::instante()->insert($table_name,$atts);
+        $instante = self::instante();
+        $result = $instante->wpdb()->insert($instante->wpdb->prefix . self::prefix . $table_name,$atts);
+        if($result === false){
+            throw new Exception(self::$instante1->wpdb()->last_error);
+        }
+        return $result;
     }
 }
