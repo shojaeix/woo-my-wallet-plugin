@@ -81,4 +81,6 @@ class wMyWallet_DBHelper
 
         return self::$instante;
     }
+
+    public function insert($table_name, array $atts){}
 }
