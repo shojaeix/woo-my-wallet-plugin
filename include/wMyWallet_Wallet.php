@@ -6,7 +6,6 @@
  * Time: 14:25
  */
 
-use wMyWallet_DBHelper;
 
 class wMyWallet_Wallet
 {
@@ -94,4 +93,10 @@ class wMyWallet_Wallet
 
     }
 
+    public static function getUserWallet($user_id) : self {
+        return new self($user_id);
+    }
+    public static function getUserWalletAmount($user_id){
+        return self::getUserWallet($user_id)->get_amount();
+    }
 }
