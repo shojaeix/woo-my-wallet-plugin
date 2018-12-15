@@ -3,23 +3,29 @@
 Plugin Name:  woo My Wallet
 Description:  Add wallet to woocommerce users with basic abilities
 */
+/**
+ * Root of plugin
+ */
+define('wMyWallet_ROOT', __DIR__);
+
 require_once 'vendor/autoload.php';
 // load include directory files
-if(is_file(__DIR__ . '/include/' . 'config.php'))
-require_once(__DIR__ . '/include/' . 'config.php');
+if (is_file(__DIR__ . '/include/' . 'config.php'))
+    require_once(__DIR__ . '/include/' . 'config.php');
 
-$include_files = scandir( __DIR__ . '/include' );
-if( count($include_files)){
-    foreach($include_files as $include_file ){
-        if( $include_file == '.' || $include_file == '..' ) continue;
-        if( is_file(__DIR__ . '/include/' . $include_file) )
+$include_files = scandir(__DIR__ . '/include');
+if (count($include_files)) {
+    foreach ($include_files as $include_file) {
+        if ($include_file == '.' || $include_file == '..') continue;
+        if (is_file(__DIR__ . '/include/' . $include_file))
             require_once(__DIR__ . '/include/' . $include_file);
     }
 }
 
 // Activation
-register_activation_hook( __FILE__, 'wMyWallet_activation' );
-function wMyWallet_activation(){
+register_activation_hook(__FILE__, 'wMyWallet_activation');
+function wMyWallet_activation()
+{
 
     global $wpdb;
     // create wallet transactions table if not exists
@@ -44,7 +50,8 @@ function wMyWallet_activation(){
 
 // Deactivation
 register_deactivation_hook(__FILE__, 'wMyWallet_deactivation');
-function wMyWallet_deactivation(){
+function wMyWallet_deactivation()
+{
     // todo | get confirm from user for delete table
 
     //  Remove wallet transactions table if user confirmed this
