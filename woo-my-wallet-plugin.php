@@ -34,6 +34,7 @@ function wMyWallet_activation(){
        `user_id` INT UNSIGNED NOT NULL ,
        `old_amount` INT UNSIGNED NOT NULL ,
        `new_amount` INT UNSIGNED NOT NULL ,
+       `description` TEXT NULL ,
         PRIMARY KEY (`id`)
     ) $charset_collate;";
 

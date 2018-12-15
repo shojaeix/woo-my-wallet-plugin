@@ -3,7 +3,7 @@
 // ckeck for duplicate
 if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
 
-    function wMyWallet_insert_new_transaction($user_id, $amount, $type, $old_amount, $new_amount, $created_at = null)
+    function wMyWallet_insert_new_transaction($user_id, $amount, $type, $old_amount, $new_amount,$description = '', $created_at = null)
     {
         // create created_at if is null
         if ($created_at == null) {
@@ -24,6 +24,7 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
             'type' => $type,
             'old_amount' => $old_amount,
             'new_amount' => $new_amount,
+            'description' => $description,
             'created_at' => $created_at,
         ];
         try {
@@ -130,10 +131,9 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
         $wallet->save();
         //  new balance
         $new_user_balance = $wallet->get_amount();
-        // todo | add description
 
         wMyWallet_insert_new_transaction($member_id, $amount, 'subtraction'
-            , $old_user_balance, $new_user_balance);
+            , $old_user_balance, $new_user_balance,$description);
 
 
         doLog(__FUNCTION__ . ' line: ' . __LINE__);
