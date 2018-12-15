@@ -3,9 +3,11 @@
 Plugin Name:  woo My Wallet
 Description:  Add wallet to woocommerce users with basic abilities
 */
-
 require_once 'vendor/autoload.php';
 // load include directory files
+if(is_file(__DIR__ . '/include/' . 'config.php'))
+require_once(__DIR__ . '/include/' . 'config.php');
+
 $include_files = scandir( __DIR__ . '/include' );
 if( count($include_files)){
     foreach($include_files as $include_file ){
