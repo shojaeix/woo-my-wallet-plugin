@@ -82,5 +82,7 @@ class wMyWallet_DBHelper
         return self::$instante;
     }
 
-    public function insert($table_name, array $atts){}
+    public static function insert($table_name, array $atts){
+        return self::instante()->insert($table_name,$atts);
+    }
 }
