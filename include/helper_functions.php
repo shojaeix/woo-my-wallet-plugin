@@ -18,4 +18,17 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
         return DateTime::createFromFormat('Y-m-d H:i:s');
     }
 
+    function doLog($text)
+    {
+        echo "<br>" . 'doLog("' . $text . '")';
+        $filename = "dolog.log";
+        $fh = fopen($filename, "a") or die("Could not open log file.");
+        fwrite($fh, date("d-m-Y, H:i") . " - $text\n") or die("Could not write file!");
+        fclose($fh);
+    }
+
+    function wMyWallet_get_datetime_string_to_show(DateTime $dateTime){
+        return $dateTime->format('Y-m-d H:i:s');
+        //return jdate('Y-m-d H:i:s')
+    }
 }
