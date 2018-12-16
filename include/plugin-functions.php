@@ -3,7 +3,7 @@
 // ckeck for duplicate
 if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
 
-    function wMyWallet_insert_new_transaction($user_id, $amount, $type, $old_amount, $new_amount,$description = '', $created_at = null)
+    function wMyWallet_insert_new_transaction($user_id, $amount, $type, $old_amount, $new_amount, $description = '', $created_at = null)
     {
         // create created_at if is null
         if ($created_at == null) {
@@ -73,6 +73,7 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
     add_action('woocommerce_cart_calculate_fees', 'wMyWallet_add_grant_discount', 999);
     function wMyWallet_add_grant_discount($cart)
     {
+
         $cart_sub_total = $cart->cart_contents_total + $cart->shipping_total;
         $user_balance = wMyWallet_Wallet::getUserWalletAmount(get_current_user_id());
 
@@ -134,10 +135,34 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
         $new_user_balance = $wallet->get_amount();
 
         wMyWallet_insert_new_transaction($member_id, $amount, 'subtraction'
-            , $old_user_balance, $new_user_balance,$description);
+            , $old_user_balance, $new_user_balance, $description);
 
 
         doLog(__FUNCTION__ . ' line: ' . __LINE__);
+    }
+
+    /**
+     * Notice error if deposit product added to cart with other products.
+     */
+    add_action('woocommerce_checkout_process', 'wMyWallet_validate_cart_before_order');
+    add_action('woocommerce_before_cart', 'wMyWallet_validate_cart_before_order');
+
+    function wMyWallet_validate_cart_before_order()
+    {
+
+        $items = WC()->cart->get_cart_contents();
+        // search for deposit item if items count is more than 1
+        if (count($items)) {
+            $deposit_product_id = wMyWallet_Options::get('deposit-product-id');
+            /**
+             * @item WC_Order_Item_Product
+             */
+            foreach ($items as $item) {
+                if ($item['product_id'] == $deposit_product_id) {
+                    wc_add_notice('شارژ کیف پول همراه با خرید محصولات دیگر امکان پذیر نیست. لطفا چیز کنید.', 'error');
+                }
+            }
+        }
     }
 
     $wMyWallet_functions_loaded = true;
