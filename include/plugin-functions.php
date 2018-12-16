@@ -125,6 +125,7 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
         $old_user_balance = $wallet->get_amount();
         // subtract discount from wallet amount
         if ($wallet->minus_amount($amount) === false) {
+            // todo | cancel order and add paid amount to wallet
             doLog('discount subtract failed.');
             return false;
         }
