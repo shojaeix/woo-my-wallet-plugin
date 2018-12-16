@@ -10,6 +10,9 @@ class wMyWallet_DBHelper
 {
 
     const prefix = 'wMyWallet_';
+    /**
+     * @var wpdb
+     */
     private $wpdb;
     /**
      * @var wMyWallet_DBHelper
@@ -18,13 +21,13 @@ class wMyWallet_DBHelper
 
     public function __construct()
     {
-        $this->wpdb();
+        $this->get_wpdb();
     }
 
     /**
      * save global wpdb object in $this object
      */
-    private function wpdb()
+    private function get_wpdb()
     {
         if (!($this->wpdb instanceof wpdb)) {
             global $wpdb;
@@ -33,6 +36,9 @@ class wMyWallet_DBHelper
         return $this->wpdb;
     }
 
+    public static function wpdb(){
+        return self::instante()->get_wpdb();
+    }
     /**
      * @param $user_id
      * @param $meta_key
@@ -73,6 +79,17 @@ class wMyWallet_DBHelper
         return dbDelta( $sql );
     }
 
+    public static function select($query){
+
+        $instante = self::instante();
+
+        $wpdb = $instante->wpdb;
+
+        $wpdb->query($query);
+
+        return $wpdb->last_result;
+    }
+
     private static function instante(){
         if(self::$instante1 instanceof wMyWallet_DBHelper){
             return self::$instante1;
@@ -85,10 +102,14 @@ class wMyWallet_DBHelper
 
     public static function insert($table_name, array $atts){
         $instante = self::instante();
-        $result = $instante->wpdb()->insert($instante->wpdb->prefix . self::prefix . $table_name,$atts);
+        $result = $instante->get_wpdb()->insert($instante->wpdb->prefix . self::prefix . $table_name,$atts);
         if($result === false){
             throw new Exception(self::$instante1->wpdb()->last_error);
         }
         return $result;
+    }
+
+    public static function update($table,$data,$where){
+        return self::instante()->wpdb()->update($table,$data,$where);
     }
 }
