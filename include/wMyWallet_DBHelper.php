@@ -102,7 +102,7 @@ class wMyWallet_DBHelper
 
     public static function insert($table_name, array $atts){
         $instante = self::instante();
-        $result = $instante->get_wpdb()->insert($instante->wpdb->prefix . self::prefix . $table_name,$atts);
+        $result = $instante->get_wpdb()->insert($table_name,$atts);
         if($result === false){
             throw new Exception(self::$instante1->wpdb()->last_error);
         }
