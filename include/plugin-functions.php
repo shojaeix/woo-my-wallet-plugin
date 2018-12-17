@@ -28,7 +28,7 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
             'created_at' => $created_at,
         ];
         try {
-            return wMyWallet_DBHelper::insert('transactions', $data);
+            return wMyWallet_DBHelper::insert(wMyWallet_DBHelper::wpdb()->prefix . wMyWallet_DBHelper::prefix . 'transactions', $data);
         } catch (Exception $exception) {
             doLog('wMyWallet_insert_new_transaction failed.' . '$data: ' . json_encode($data) . ' Error: ' . $exception->getMessage());
         }
@@ -165,5 +165,22 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
         }
     }
 
+    // my wallet transactions page
+    add_shortcode('wMyWallet_my_wallet_transactions','wMyWallet_show_my_wallet_transactions');
+    function wMyWallet_show_my_wallet_transactions(){
+        $user_id = get_current_user_id();
+        $my_transactions = wMyWallet_DBHelper::select('
+        select * from ' . wMyWallet_DBHelper::wpdb()->prefix . wMyWallet_DBHelper::prefix . 'transactions
+         where user_id=' . $user_id . ' ORDER BY created_at DESC');
+        $args = [
+            'transactions' => $my_transactions,
+        ];
+        return wMyWallet_render_template('my_wallet_transactions', $args);
+    }
+    // my wallet amount
+    add_shortcode('wMyWallet_my_wallet_amount','wMyWallet_my_wallet_amount');
+    function wMyWallet_my_wallet_amount(){
+        return '1000 تومان';
+    }
     $wMyWallet_functions_loaded = true;
 }
