@@ -28,7 +28,7 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
             'created_at' => $created_at,
         ];
         try {
-            return wMyWallet_DBHelper::insert('transactions', $data);
+            return wMyWallet_DBHelper::insert(wMyWallet_DBHelper::wpdb()->prefix . wMyWallet_DBHelper::prefix . 'transactions', $data);
         } catch (Exception $exception) {
             doLog('wMyWallet_insert_new_transaction failed.' . '$data: ' . json_encode($data) . ' Error: ' . $exception->getMessage());
         }
