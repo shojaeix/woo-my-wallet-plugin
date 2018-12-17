@@ -38,10 +38,15 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
      * @param array $args
      * @throws Exception throw if template file not exists. template_name.php file should exist in templates directory.
      */
-    function wMyWallet_render_template($template_name,array $args = []){
+    function wMyWallet_render_template($template_name,array $args, bool $return_output = true){
         if(!is_file(wMyWallet_ROOT . '/templates/' . $template_name . '.php'))
             throw new Exception('Template ' . $template_name . ' not found.');
 
+        if ($return_output) {
+            ob_start();
+            require wMyWallet_ROOT . '/templates/' . $template_name . '.php';
+            return ob_get_clean();
+        }
         require wMyWallet_ROOT . '/templates/' . $template_name . '.php';
     }
 

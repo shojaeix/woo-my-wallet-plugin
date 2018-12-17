@@ -73,5 +73,5 @@ function wMyWallet_main_options_page()
     wMyWallet_render_template('main-options', [
         'deposit-product-id' => wMyWallet_Options::get('deposit-product-id'),
         'withdrawal-min' => wMyWallet_Options::get('withdrawal-min'),
-    ]);
+    ],false);
 }
