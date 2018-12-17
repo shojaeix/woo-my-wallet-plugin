@@ -44,4 +44,27 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
 
         require wMyWallet_ROOT . '/templates/' . $template_name . '.php';
     }
+
+    function wMyWallet_show_admin_error($text){
+        ?>
+        <div class="error notice">
+            <p><?php echo $text; ?></p>
+        </div>
+        <?php
+    }
+
+    function wMyWallet_show_admin_notice($text){
+        ?>
+        <div class="updated notice">
+            <p><?php echo $text; ?></p>
+        </div>
+        <?php
+    }
+    function wMyWallet_show_admin_notice_pan($text){
+        ?>
+        <div class="update-nag notice">
+            <p><?php echo $text; ?></p>
+        </div>
+        <?php
+    }
 }
