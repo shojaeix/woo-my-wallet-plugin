@@ -38,7 +38,7 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
      * @param array $args
      * @throws Exception throw if template file not exists. template_name.php file should exist in templates directory.
      */
-    function wMyWallet_render_template($template_name,array $args, bool $return_output = true){
+    function wMyWallet_render_template($template_name,array $args = [], bool $return_output = true){
         if(!is_file(wMyWallet_ROOT . '/templates/' . $template_name . '.php'))
             throw new Exception('Template ' . $template_name . ' not found.');
 
@@ -71,5 +71,17 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
             <p><?php echo $text; ?></p>
         </div>
         <?php
+    }
+
+    function wMyWallet_get_transaction($transaction_id){
+        $table_name = wMyWallet_DBHelper::wpdb()->prefix . wMyWallet_DBHelper::prefix . 'transactions';
+        $query = 'select * from ' . $table_name. ' where id=' . $transaction_id;
+
+        $rows = wMyWallet_DBHelper::select($query);
+
+        if(count($rows)){
+            return $rows[0];
+        }
+        return null;
     }
 }
