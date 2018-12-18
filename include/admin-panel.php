@@ -9,12 +9,31 @@
 add_action('admin_menu', 'wMyWallet_add_admin_menu_pages');
 
 function wMyWallet_add_admin_menu_pages(){
-    add_menu_page( 'تنظیمات کیف پول کاربران', 'کیف پول کاربران',
-        'manage_options', 'wmywallet-main-options', 'wMyWallet_main_options_page' );
+
+    // main menu
+    add_menu_page( null, 'کیف پول من',
+        null, 'wmywallet-main-menu', null );
+
+    // new transaction
+    add_submenu_page('wmywallet-main-menu','+ تراکنش کیف پول','تراکنش جدید','manage_options'
+        ,'wmywallet-new-transaction-page'
+        ,'wmywallet_new_transaction_page');
+
+    // setting
+    add_submenu_page('wmywallet-main-menu','تنظیمات کیف پول کاربران','تنظیمات'
+        ,'manage_options'
+        ,'wmywallet-main-options'
+        ,'wMyWallet_main_options_page');
+
+    // transaction info
+    add_submenu_page('wmywallet-main-menu','مشاهده تراکنش','مشاهده تراکنش','manage_options'
+        ,'wmywallet-transaction-info'
+        ,'wMyWallet_transaction_info');
+
 }
 
 /**
- * Check for submited options and save then after validate
+ * Check for submited options and save then after validatewmywallet_transaction_info
  * Show main-option template
  * @throws Exception
  */
