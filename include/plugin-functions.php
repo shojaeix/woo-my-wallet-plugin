@@ -78,6 +78,8 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
         $user_balance = wMyWallet_Wallet::getUserWalletAmount(get_current_user_id());
 
         $discount = min($user_balance, $cart_sub_total);
+
+        // return if product is deposit product or child of that.
         // add discount
         if ($discount > 0)
             $cart->add_fee(wMyWallet_discount_title, -1 * $discount); // todo | replace text with constant
@@ -139,6 +141,68 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
 
 
         doLog(__FUNCTION__ . ' line: ' . __LINE__);
+    }
+
+    // deposit by deposit-product
+    add_action('woocommerce_payment_complete', 'wMyWallet_add_deposit_by_product');
+    function wMyWallet_add_deposit_by_product($order_id)
+    {
+        //$order = new WC_Order($order_id);
+        $order = wc_get_order($order_id);
+        $items = $order->get_items();
+
+        $deposit_amount = 0;
+        /**
+         * @var WC_Order_Item_Product
+         */
+        foreach ($items as $item_product) {
+
+            // get item product data
+            $item_product_data = $item_product->get_data();
+            $variation_id = $item_product_data['variation_id'];
+            $parent_product_id = $item_product_data['product_id'];
+            $product_id = $variation_id > 0 ? $variation_id : $parent_product_id;
+
+
+            // continue if product is not in deposit products list
+            if (!in_array($parent_product_id, wMyWallet_Options::get_array('deposit-product-id'))) {
+                continue;
+            }
+
+            // get Product and product data
+            $product = wc_get_product($product_id);
+            $product_data = $product->get_data();
+            $regular_price = $product_data['regular_price'];
+            $quantity = $item_product_data['quantity'];
+
+            // calc deposit amount
+            $deposit_amount += $regular_price * $quantity;
+        }
+
+        if ($deposit_amount > 0) {
+
+            $order_user_id = $order->get_user_id();
+            // add amount to wallet
+            $wallet = wMyWallet_Wallet::getUserWallet($order_user_id);
+            $old_amount = $wallet->get_amount();
+            try {
+                $wallet->add_amount($deposit_amount);
+                $wallet->save();
+            } catch (Exception $exception) {
+                doLog('error in wallet deposit. Order id = ' . $order_id . ' Error: ' . $exception->getMessage());
+            }
+            $new_amount = $wallet->get_amount();
+            // insert new transaction
+            wMyWallet_insert_new_transaction(
+                $order_user_id,
+                $deposit_amount,
+                'addition',
+                $old_amount,
+                $new_amount,
+                'شارژ کیف پول از طریق سفارش شماره ' . $order_id
+            );
+        }
+
     }
 
     /**
@@ -298,7 +362,7 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
         return wMyWallet_render_template('transaction_info',$args, false);
     }
 
-
+    // return transaction info
     function wMyWallet_transaction_info(){
         if(!isset($_GET['transaction_id']) or !is_numeric($_GET['transaction_id'])){
             // show error only if entered transaction id  is invalid
