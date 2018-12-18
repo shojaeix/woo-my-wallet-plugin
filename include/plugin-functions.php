@@ -41,6 +41,9 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
 
     function wMyWallet_get_all_transactions()
     {
+        return wMyWallet_DBHelper::select('
+        select * from ' . wMyWallet_DBHelper::wpdb()->prefix . wMyWallet_DBHelper::prefix . 'transactions  
+        order by created_at DESC');
     }
 
 
@@ -229,164 +232,7 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
         }
     }
 
-    // my wallet transactions page
-    //add_shortcode('wMyWallet_my_wallet_transactions','wMyWallet_show_my_wallet_transactions');
-    function wMyWallet_show_my_wallet_transactions(){
-        $user_id = get_current_user_id();
-        $my_transactions = wMyWallet_DBHelper::select('
-        select * from ' . wMyWallet_DBHelper::wpdb()->prefix . wMyWallet_DBHelper::prefix . 'transactions
-         where user_id=' . $user_id . ' ORDER BY created_at DESC');
-        $args = [
-            'transactions' => $my_transactions,
-        ];
-        return wMyWallet_render_template('my_wallet_transactions', $args);
-    }
-    // my wallet amount
-    add_shortcode('wMyWallet_my_wallet_amount','wMyWallet_my_wallet_amount');
-    function wMyWallet_my_wallet_amount(){
-        return '1000 تومان';
-    }
-
-    // new transaction page
-    //add_shortcode('wmywallet_new_transaction_page','wmywallet_new_transaction_page');
-    function wmywallet_new_transaction_page(){
-        if(!isset($_GET['user_id']) or !is_numeric($_GET['user_id'])){
-            //wMyWallet_show_admin_error('ایدی کاربر وارد نشده است.');
-            return wMyWallet_render_template('new_transction_choose_user_form',[] , false);
-
-        }
-        $user_id = $_GET['user_id'];
-
-        $user = get_user_by('ID',$user_id);
-
-        if($user === false){
-            wMyWallet_show_admin_error('ایدی کاربر نامعتبر است.');
-            return wMyWallet_render_template('new_transction_choose_user_form',[] , false);
-
-        }
-        $args = [
-            'user' => $user,
-        ];
-
-        // validation
-        $validated = true;
-        if(!isset($_POST['amount']) or !is_numeric($_POST['amount']) or (int)htmlspecialchars($_POST['amount']) <= 0){
-            if(isset($_POST['amount']))
-            wMyWallet_show_admin_error('مقدار تراکنش نامعتبر است.');
-            $validated = false;
-        }
-
-        if(!isset($_POST['type']) or !is_string($_POST['type']) or !in_array($_POST['type'], ['subtraction', 'addition'])){
-            if(isset($_POST['type']))
-            wMyWallet_show_admin_error('نوع تراکنش نامعتبر است.');
-            $validated = false;
-        }
-
-        if(!isset($_POST['description']) or !is_string($_POST['description']) or strlen($_POST['description']) < 20){
-            if(isset($_POST['description']))
-            wMyWallet_show_admin_error('لطفا حداقل ۲۰ حرف به عنوان توضیحات وارد کنید.');
-            $validated = false;
-        }
 
 
-        // show form if not validated
-        if(!$validated)
-        {
-            return wMyWallet_render_template('new_transaction_form',$args, false);
-        }
-
-        $validated_data = [
-            'amount' => $_POST['amount'],
-            'type' => $_POST['type'],
-            'description' => $_POST['description'],
-        ];
-
-
-        // confirm
-        $confirm = false;
-        if(isset($_POST['confirm']) and is_numeric($_POST['confirm']) and (int)$_POST['confirm'] === 2){
-            $confirm = true;
-        }
-        // show confirm page if not confirmed
-        $args['validated_data'] = $validated_data;
-
-        $wallet = new wMyWallet_Wallet($user->ID);
-        $args['wallet_amount'] = $wallet->get_amount();
-
-        if(!$confirm){
-            return wMyWallet_render_template('new_transaction_confirm',$args, false); // show confirm page
-        }
-        // created new transaction if confirmed
-
-        $old_amount = $wallet->get_amount();
-        try{
-
-            if($validated_data['type'] == 'subtraction') {
-                if ($wallet->minus_amount($validated_data['amount']) == false) {
-                    wMyWallet_show_admin_error('موجودی کیف پول کاربر کافی نیست.' . '(' . $wallet->get_amount() . ')');
-                    return wMyWallet_render_template('new_transaction_form', $args, false); // show confirm page
-                }
-            } else if ($validated_data['type'] == 'addition') {
-                if ($wallet->add_amount($validated_data['amount']) == false) {
-                    wMyWallet_show_admin_error('خطا در هنگام افزایش موجودی کیف پول.');
-                    return wMyWallet_render_template('new_transaction_confirm', $args, false); // show confirm page
-                }
-            } else {
-                throw new Exception('function: ' . __FUNCTION__ . ' LINE: ' . __LINE__);
-            }
-
-            $wallet->save();
-        } catch (Exception $exception){
-            wMyWallet_show_admin_error($exception->getMessage());
-        }
-        $new_amount = $wallet->get_amount();
-        // insert new transaction
-        $transaction_id = wMyWallet_insert_new_transaction(
-            $user->ID,
-            $validated_data['amount'],
-            $validated_data['type'],
-            $old_amount,
-            $new_amount,
-            $validated_data['description']
-        );
-
-        $transaction = wMyWallet_get_transaction($transaction_id);
-        $args = [
-            'user' => $user,
-            'transaction' => $transaction,
-
-        ];
-
-        wMyWallet_show_admin_notice('تراکنش با موفقیت انجام شد.');
-        // show new transaction info
-        return wMyWallet_render_template('transaction_info',$args, false);
-    }
-
-    // return transaction info
-    function wMyWallet_transaction_info(){
-        if(!isset($_GET['transaction_id']) or !is_numeric($_GET['transaction_id'])){
-            // show error only if entered transaction id  is invalid
-            if(isset($_GET['transaction_id']))
-            {
-                wMyWallet_show_admin_error('شناسه تراکنش نامعتبر است.');
-            }
-
-            return wMyWallet_render_template('transaction_info_form',[],false);
-
-        }
-
-        $transaction_id = $_GET['transaction_id'];
-
-        $transaction = wMyWallet_get_transaction($transaction_id);
-        if(is_null($transaction)){
-            wMyWallet_show_admin_error('شناسه تراکنش نامعتبر است.');
-
-           return wMyWallet_render_template('transaction_info_form',[],false);
-        }
-        return wMyWallet_render_template('transaction_info',[
-            'user' => get_user_by('id',1),
-            'transaction' => $transaction,
-        ],false);
-    }
     $wMyWallet_functions_loaded = true;
 }

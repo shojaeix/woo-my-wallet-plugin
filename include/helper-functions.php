@@ -13,7 +13,7 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
         return $dateTime->format('Y-m-d H:i:s');
     }
 
-    function wMyWallet_string_to_datetime(string $string) : DateTime
+    function wMyWallet_string_to_datetime(string $string): DateTime
     {
         return DateTime::createFromFormat('Y-m-d H:i:s');
     }
@@ -27,7 +27,8 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
         fclose($fh);
     }
 
-    function wMyWallet_get_datetime_string_to_show(DateTime $dateTime){
+    function wMyWallet_get_datetime_string_to_show(DateTime $dateTime)
+    {
         return $dateTime->format('Y-m-d H:i:s');
         //return jdate('Y-m-d H:i:s')
     }
@@ -38,8 +39,9 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
      * @param array $args
      * @throws Exception throw if template file not exists. template_name.php file should exist in templates directory.
      */
-    function wMyWallet_render_template($template_name,array $args = [], bool $return_output = true){
-        if(!is_file(wMyWallet_ROOT . '/templates/' . $template_name . '.php'))
+    function wMyWallet_render_template($template_name, array $args = [], bool $return_output = true)
+    {
+        if (!is_file(wMyWallet_ROOT . '/templates/' . $template_name . '.php'))
             throw new Exception('Template ' . $template_name . ' not found.');
 
         if ($return_output) {
@@ -50,7 +52,8 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
         require wMyWallet_ROOT . '/templates/' . $template_name . '.php';
     }
 
-    function wMyWallet_show_admin_error($text){
+    function wMyWallet_show_admin_error($text)
+    {
         ?>
         <div class="error notice">
             <p><?php echo $text; ?></p>
@@ -58,14 +61,17 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
         <?php
     }
 
-    function wMyWallet_show_admin_notice($text){
+    function wMyWallet_show_admin_notice($text)
+    {
         ?>
         <div class="updated notice">
             <p><?php echo $text; ?></p>
         </div>
         <?php
     }
-    function wMyWallet_show_admin_notice_pan($text){
+
+    function wMyWallet_show_admin_notice_pan($text)
+    {
         ?>
         <div class="update-nag notice">
             <p><?php echo $text; ?></p>
@@ -73,15 +79,70 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
         <?php
     }
 
-    function wMyWallet_get_transaction($transaction_id){
+    function wMyWallet_get_transaction($transaction_id)
+    {
         $table_name = wMyWallet_DBHelper::wpdb()->prefix . wMyWallet_DBHelper::prefix . 'transactions';
-        $query = 'select * from ' . $table_name. ' where id=' . $transaction_id;
+        $query = 'select * from ' . $table_name . ' where id=' . $transaction_id;
 
         $rows = wMyWallet_DBHelper::select($query);
 
-        if(count($rows)){
+        if (count($rows)) {
             return $rows[0];
         }
         return null;
+    }
+
+    function wMyWallet_widthrawal_requests_table_name()
+    {
+        return wMyWallet_DBHelper::wpdb()->prefix . wMyWallet_DBHelper::prefix . 'withdrawal_requests';
+    }
+
+    function wMyWallet_insert_new_widthrawal_request($user_id, $amount, string $status, $user_description = null, $admin_description = null, $created_at = null, $paid_at = null)
+    {
+        // create created_at if is null
+        if ($created_at == null) {
+            $datetime = new DateTime('now', new DateTimeZone('Asia/Tehran'));
+            $created_at = wMyWallet_datetime_to_string($datetime);
+        } // convert created at to string if it's Object
+        else if ($created_at instanceof DateTime) {
+            $created_at = wMyWallet_datetime_to_string($created_at);
+        }
+
+
+        $data = [
+            'user_id' => $user_id,
+            'amount' => $amount,
+            'status' => $status,
+            'user_description' => $user_description,
+            'admin_description' => $admin_description,
+            'paid_at' => $paid_at,
+            'created_at' => $created_at,
+        ];
+        try {
+            return wMyWallet_DBHelper::insert(wMyWallet_widthrawal_requests_table_name(), $data);
+        } catch (Exception $exception) {
+            doLog(__FUNCTION__ . ' failed.' . '$data: ' . json_encode($data) . ' Error: ' . $exception->getMessage());
+        }
+        return false;
+    }
+
+    function wMyWallet_get_user_withdrawal_requests($user_id)
+    {
+        return wMyWallet_DBHelper::select('
+        select * from ' . wMyWallet_widthrawal_requests_table_name() . ' where user_id=' . $user_id);
+    }
+
+    function wMyWallet_get_all_withdrawal_requests(){
+        return wMyWallet_DBHelper::select('
+        select * from ' . wMyWallet_DBHelper::wpdb()->prefix . wMyWallet_DBHelper::prefix . 'withdrawal_requests 
+        order by created_at desc');
+    }
+
+    function wMyWallet_update_withdrawal_request($id,$data){
+        return wMyWallet_DBHelper::update(wMyWallet_widthrawal_requests_table_name(),
+            $data,
+            [
+                    'id' => $id
+            ]);
     }
 }

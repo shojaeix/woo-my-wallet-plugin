@@ -110,7 +110,7 @@ class wMyWallet_DBHelper
         return $wpdb->insert_id;
     }
 
-    public static function update($table,$data,$where){
+    public static function update($table,array $data,array $where){
         return self::instante()->wpdb()->update($table,$data,$where);
     }
 }

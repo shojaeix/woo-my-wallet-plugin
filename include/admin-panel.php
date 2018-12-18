@@ -30,6 +30,17 @@ function wMyWallet_add_admin_menu_pages(){
         ,'wmywallet-transaction-info'
         ,'wMyWallet_transaction_info');
 
+    // transaction info
+    add_submenu_page('wmywallet-main-menu','لیست درخواست های برداشت','درخواست های برداشت'
+        ,'manage_options'
+        ,'wmywallet-withdarawal-requests-list'
+        ,'wMywallet_withdrawal_requests_list');
+
+    // transaction info
+    add_submenu_page(null,'جزئیات درخواست',null
+        ,'manage_options'
+        ,'wMyWallet-withdrawal-request-info'
+        ,'wMyWallet_withdrawal_request_info');
 }
 
 /**
@@ -93,4 +104,210 @@ function wMyWallet_main_options_page()
         'deposit-product-id' => wMyWallet_Options::get('deposit-product-id'),
         'withdrawal-min' => wMyWallet_Options::get('withdrawal-min'),
     ],false);
+}
+
+// new transaction page
+function wmywallet_new_transaction_page()
+{
+    if (!isset($_GET['user_id']) or !is_numeric($_GET['user_id'])) {
+        //wMyWallet_show_admin_error('ایدی کاربر وارد نشده است.');
+        return wMyWallet_render_template('new_transction_choose_user_form', [], false);
+
+    }
+    $user_id = $_GET['user_id'];
+
+    $user = get_user_by('ID', $user_id);
+
+    if ($user === false) {
+        wMyWallet_show_admin_error('ایدی کاربر نامعتبر است.');
+        return wMyWallet_render_template('new_transction_choose_user_form', [], false);
+
+    }
+    $args = [
+        'user' => $user,
+    ];
+
+    // validation
+    $validated = true;
+    if (!isset($_POST['amount']) or !is_numeric($_POST['amount']) or (int)htmlspecialchars($_POST['amount']) <= 0) {
+        if (isset($_POST['amount']))
+            wMyWallet_show_admin_error('مقدار تراکنش نامعتبر است.');
+        $validated = false;
+    }
+
+    if (!isset($_POST['type']) or !is_string($_POST['type']) or !in_array($_POST['type'], ['subtraction', 'addition'])) {
+        if (isset($_POST['type']))
+            wMyWallet_show_admin_error('نوع تراکنش نامعتبر است.');
+        $validated = false;
+    }
+
+    if (!isset($_POST['description']) or !is_string($_POST['description']) or strlen($_POST['description']) < 20) {
+        if (isset($_POST['description']))
+            wMyWallet_show_admin_error('لطفا حداقل ۲۰ حرف به عنوان توضیحات وارد کنید.');
+        $validated = false;
+    }
+
+
+    // show form if not validated
+    if (!$validated) {
+        return wMyWallet_render_template('new_transaction_form', $args, false);
+    }
+
+    $validated_data = [
+        'amount' => $_POST['amount'],
+        'type' => $_POST['type'],
+        'description' => $_POST['description'],
+    ];
+
+
+    // confirm
+    $confirm = false;
+    if (isset($_POST['confirm']) and is_numeric($_POST['confirm']) and (int)$_POST['confirm'] === 2) {
+        $confirm = true;
+    }
+    // show confirm page if not confirmed
+    $args['validated_data'] = $validated_data;
+
+    $wallet = new wMyWallet_Wallet($user->ID);
+    $args['wallet_amount'] = $wallet->get_amount();
+
+    if (!$confirm) {
+        return wMyWallet_render_template('new_transaction_confirm', $args, false); // show confirm page
+    }
+    // created new transaction if confirmed
+
+    $old_amount = $wallet->get_amount();
+    try {
+
+        if ($validated_data['type'] == 'subtraction') {
+            if ($wallet->minus_amount($validated_data['amount']) == false) {
+                wMyWallet_show_admin_error('موجودی کیف پول کاربر کافی نیست.' . '(' . $wallet->get_amount() . ')');
+                return wMyWallet_render_template('new_transaction_form', $args, false); // show confirm page
+            }
+        } else if ($validated_data['type'] == 'addition') {
+            if ($wallet->add_amount($validated_data['amount']) == false) {
+                wMyWallet_show_admin_error('خطا در هنگام افزایش موجودی کیف پول.');
+                return wMyWallet_render_template('new_transaction_confirm', $args, false); // show confirm page
+            }
+        } else {
+            throw new Exception('function: ' . __FUNCTION__ . ' LINE: ' . __LINE__);
+        }
+
+        $wallet->save();
+    } catch (Exception $exception) {
+        wMyWallet_show_admin_error($exception->getMessage());
+    }
+    $new_amount = $wallet->get_amount();
+    // insert new transaction
+    $transaction_id = wMyWallet_insert_new_transaction(
+        $user->ID,
+        $validated_data['amount'],
+        $validated_data['type'],
+        $old_amount,
+        $new_amount,
+        $validated_data['description']
+    );
+
+    $transaction = wMyWallet_get_transaction($transaction_id);
+    $args = [
+        'user' => $user,
+        'transaction' => $transaction,
+
+    ];
+
+    wMyWallet_show_admin_notice('تراکنش با موفقیت انجام شد.');
+    // show new transaction info
+    return wMyWallet_render_template('transaction_info', $args, false);
+}
+
+// return transaction info
+function wMyWallet_transaction_info()
+{
+    if (!isset($_GET['transaction_id']) or !is_numeric($_GET['transaction_id'])) {
+        // show error only if entered transaction id  is invalid
+        if (isset($_GET['transaction_id'])) {
+            wMyWallet_show_admin_error('شناسه تراکنش نامعتبر است.');
+        } else {
+            return wMyWallet_all_transactions_page();
+        }
+
+        return wMyWallet_render_template('transaction_info_form', [], false);
+
+    }
+
+    $transaction_id = $_GET['transaction_id'];
+
+    $transaction = wMyWallet_get_transaction($transaction_id);
+    if (is_null($transaction)) {
+        wMyWallet_show_admin_error('شناسه تراکنش نامعتبر است.');
+
+        return wMyWallet_render_template('transaction_info_form', [], false);
+    }
+    return wMyWallet_render_template('transaction_info', [
+        'user' => get_user_by('id', 1),
+        'transaction' => $transaction,
+    ], false);
+}
+
+// all transactions page
+function wMyWallet_all_transactions_page()
+{
+    $transactions = wMyWallet_get_all_transactions();
+    $args = [
+        'transactions' => $transactions,
+    ];
+    // return tranasction_info_form + all_transaction templates
+    wMyWallet_render_template('transaction_info_form', [], false);
+    echo '<br>';
+    wMyWallet_render_template('all_transactions', $args, false);
+}
+
+// withdrawal requests page
+function wMywallet_withdrawal_requests_list(){
+    wMyWallet_render_template('withdrawal-requests-list',[
+        'widthrawals' => wMyWallet_get_all_withdrawal_requests(),
+    ],false);
+}
+
+function wMyWallet_withdrawal_request_info(){
+    $widthrawal_id = (isset($_GET['withdrawal_id']) and is_numeric($_GET['withdrawal_id'])) ? (int)$_GET['withdrawal_id'] : null;
+
+    if($widthrawal_id == null){
+        wMyWallet_show_admin_error('آیدی درخواست وارد نشده است.');
+        return;
+    }
+
+    $rows = wMyWallet_DBHelper::select('
+    select * from ' . wMyWallet_widthrawal_requests_table_name() . ' where id=' . $widthrawal_id);
+    $widthrawal = (count($rows)) ? $rows[0] : null;
+
+    if(is_null($widthrawal)){
+        wMyWallet_show_admin_error('آیدی درخواست وارد شده نامعتبر است.' . $widthrawal_id);
+        return;
+    }
+
+    // update admin description if needed
+    if(isset($_POST['admin_description'])){
+        $new_admin_description = htmlspecialchars($_POST['admin_description']);
+        if($new_admin_description != $widthrawal->admin_description){
+            $widthrawal->admin_description = $new_admin_description;
+                wMyWallet_update_withdrawal_request($widthrawal_id,[
+                    'admin_description' => $new_admin_description,
+                ]);
+        }
+    }
+
+    // update admin description if needed
+    if(isset($_POST['paid']) and is_numeric($_POST['paid']) and (int)$_POST['paid'] === 2){
+        if($widthrawal->status != 'paid'){
+            $widthrawal->status = 'paid';
+            wMyWallet_update_withdrawal_request($widthrawal_id,[
+                'status' => 'paid',
+            ]);
+        }
+    }
+    wMyWallet_render_template('withdrawal-request-info',
+        [
+            'withdrawal' => $widthrawal,
+        ], false);
 }
