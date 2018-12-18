@@ -48,6 +48,11 @@ class wMyWallet_Options
         return null;
     }
 
+    public static function get_array(string $key, bool $only_if_saved = false){
+        $value = self::get($key,$only_if_saved);
+
+        return is_array($value) ? $value : [ $value ];
+    }
     /**
      * Save new value for key in db
      * @note Avoid repetition
