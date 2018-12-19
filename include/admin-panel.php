@@ -303,6 +303,7 @@ function wMyWallet_withdrawal_request_info(){
             $widthrawal->status = 'paid';
             wMyWallet_update_withdrawal_request($widthrawal_id,[
                 'status' => 'paid',
+                'paid_at' => wMyWallet_datetime_to_string(new DateTime()),
             ]);
         }
     }

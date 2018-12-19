@@ -25,7 +25,7 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
     add_shortcode('wMyWallet_my_wallet_amount', 'wMyWallet_my_wallet_amount');
     function wMyWallet_my_wallet_amount()
     {
-        return wMyWallet_Wallet::getUserWalletAmount(get_current_user_id()) . ' تومان';
+        return wMyWallet_Wallet::getUserWalletAmount(get_current_user_id()) . get_woocommerce_currency_symbol();
     }
 
 
@@ -97,6 +97,16 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
         $validated = !(bool)count($errors);
 
         if($validated){
+        $withdrawal_min = (int)wMyWallet_Options::get('withdrawal-min');
+        if($withdrawal_min>0){
+                if ($validated_data['amount'] < $withdrawal_min) {
+                    array_push($errors, 'مبلغ درخواست حداقل باید ' . $withdrawal_min . ' باشد.');
+                    $validated = false;
+                }
+            }
+        }
+
+        if($validated){
             $wallet = wMyWallet_Wallet::getUserWallet(get_current_user_id());
             if($validated_data['amount'] > $wallet->get_amount()){
                 array_push($errors, 'مبلغ درخواست از موجودی کیف پول بیشتر است');
@@ -149,6 +159,7 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
             'requests' => $requests,
         ]);
     }
+
 
     $wMyWallet_shortcodes_loaded = true;
 }

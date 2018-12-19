@@ -47,7 +47,7 @@ $transactions = array_slice(
             <tr>
                 <td><?php echo $transaction->id; ?></td>
                 <td><?php echo ($transaction->type == 'subtraction') ? 'کاهش' : 'افزایش' ; ?></td>
-                <td><?php echo ($transaction->amount); ?> تومان </td>
+                <td><?php echo ($transaction->amount) . get_woocommerce_currency_symbol(); ?>   </td>
                 <td><?php echo ($transaction->created_at); //todo | convert date ?></td>
             </tr>
     <?php

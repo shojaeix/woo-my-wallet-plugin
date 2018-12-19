@@ -145,4 +145,8 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
                     'id' => $id
             ]);
     }
+
+    function wMyWallet_get_currency_symbol(){
+        return get_woocommerce_currency_symbol();
+    }
 }
