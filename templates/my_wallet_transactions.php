@@ -7,7 +7,7 @@
  */
 $transactions = isset($args['transactions']) ? $args['transactions'] : [] ;
 
-// how many records should be displayed on a page?
+// records should be displayed on a page
 $records_per_page = 30;
 
 // include the pagination class

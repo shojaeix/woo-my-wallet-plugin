@@ -46,6 +46,22 @@ function wMyWallet_activation()
 
     wMyWallet_DBHelper::delta_query($sql);
 
+    $table_name = wMyWallet_widthrawal_requests_table_name();
+    $widthrawal_requests_table_query = '
+    CREATE TABLE  IF NOT EXISTS ' . $table_name . ' 
+    (  `id` INT NOT NULL AUTO_INCREMENT ,
+       `amount` INT UNSIGNED NOT NULL ,
+       `user_id` INT UNSIGNED NOT NULL ,
+       `created_at` DATETIME NOT NULL ,
+       `paid_at` DATETIME NULL ,
+       `admin_description` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL ,
+       `status` VARCHAR(20) NOT NULL ,
+       `user_description` INT NULL ,
+        PRIMARY KEY (`id`)
+    ) ENGINE = MyISAM CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+    ';
+    wMyWallet_DBHelper::delta_query($widthrawal_requests_table_query);
+
 }
 
 // Deactivation
