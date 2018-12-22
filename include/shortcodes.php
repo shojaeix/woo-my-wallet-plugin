@@ -149,23 +149,27 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
                 'errors' => $errors,
             ]);
         }
-        // insert new request if validated
+
+        // subtract request amount from wallet amount
+        $old_amount = $wallet->get_amount();
+
+        try{
+            if($wallet->minus_amount($validated_data['amount']) == false){
+                return;
+            }
+            $wallet->save();
+        } catch (Exception $exception){
+            doLog(__FUNCTION__ . ' error in line ' . __LINE__ . ' Error: ' . $exception->getMessage());
+        }
+        $new_amount = $wallet->get_amount();
+
+        // insert new request
         $withdrawal_id = wMyWallet_insert_new_widthrawal_request(get_current_user_id(),
             $validated_data['amount'],
             'pending',
             $validated_data['user_description'],
             null);
 
-        // subtract request amount from wallet amount
-        $old_amount = $wallet->get_amount();
-
-        try{
-            $wallet->minus_amount($validated_data['amount']);
-            $wallet->save();
-        } catch (Exception $exception){
-            doLog(__FUNCTION__ . ' error in line ' . __LINE__ . ' Error: ' . $exception->getMessage());
-        }
-        $new_amount = $wallet->get_amount();
         // create transaction
         wMyWallet_insert_new_transaction(get_current_user_id(),$validated_data['amount'],
             'subtraction',
@@ -173,7 +177,7 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
             $new_amount,
             'کسر موجودی به موجب درخواست برداشت وجه شماره ' . $withdrawal_id);
 
-        return 'درخواست شما با موفقیت ثبت شد.';
+        return 'درخواست شما با موفقیت ثبت شد. شماره درخواست: ' . $withdrawal_id;
 
     }
 
