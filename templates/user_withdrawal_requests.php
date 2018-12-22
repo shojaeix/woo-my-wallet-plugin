@@ -30,35 +30,60 @@ $requests = array_slice(
     $records_per_page
 );
 
+$statuses_trans = [
+    'pending' => 'در انتظار پرداخت',
+    'paid' => 'پرداخت شده',
+    'rejected' => 'نامعتبرر ',
+    'canceled' => 'لغو شده',
+
+];
 ?>
+<div class="wrap" >
 
 
-<table>
-    <thead>
-    <th>شماره درخواست</th>
-    <th>وضعیت</th>
-    <th>مقدار</th>
-    <th>توضیحات شما</th>
-    <th>تاریخ درخواست</th>
-    <th>تاریخ واریز</th>
-    </thead>
-    <tbody>
+    <!-- new withdrawal request button -->
+    <?php
+    if(wMyWallet_short_code_used_page_exist('wMyWallet_withdrawal_request_form_page')){ ?>
+        <a href="<?php echo wMyWallet_shortcode_used_page_link('wMyWallet_withdrawal_request_form_page'); ?>" >
+            <button class="button button-primary">➕ درخواست برداشت </button></a>
+    <?php } ?>
+
+    <!--  my wallet transactions button  -->
+    <?php if(wMyWallet_short_code_used_page_exist('wMyWallet_my_wallet_transactions_page')){ ?>
+        <a href="<?php echo wMyWallet_shortcode_used_page_link('wMyWallet_my_wallet_transactions_page'); ?>" >
+            <button class="button button-primary">لیست تراکنش ها</button></a>
+    <?php } ?>
+
+    <br><br>
+
+
+    <table>
+        <thead>
+        <th>شماره درخواست</th>
+        <th>وضعیت</th>
+        <th>مقدار</th>
+        <th>توضیحات شما</th>
+        <th>تاریخ درخواست</th>
+        <th>تاریخ واریز</th>
+        </thead>
+        <tbody>
         <?php
-            foreach ($requests as $request){
-                echo '<tr>';
-                echo '<td> ' . $request->id . '</td>';
-                echo '<td> ' . $request->status . '</td>';
-                echo '<td>' . $request->amount . '</td>';
-                echo '<td>' . $request->user_description . '</td>';
-                echo '<td>' . $request->created_at . '</td>'; // todo | shamsi
-                echo '<td>' . (isset($request->paid_at) ? $request->paid_at : '') . '</td>';
+        foreach ($requests as $request){
+            echo '<tr>';
+            echo '<td> ' . $request->id . '</td>';
+            echo '<td> ' . ((isset($statuses_trans[$request->status])) ? $statuses_trans[$request->status] : 'نامشخص' ) . '</td>';
+            echo '<td>' . $request->amount . '</td>';
+            echo '<td>' . $request->user_description . '</td>';
+            echo '<td>' . wMyWallet_helical($request->created_at) . '</td>'; // todo | shamsi
+            echo '<td>' . (isset($request->paid_at) ? wMyWallet_helical($request->paid_at) : '') . '</td>';
 
-                echo '</tr>';
-            }
+            echo '</tr>';
+        }
         ?>
-    </tbody>
-</table>
-<?php
-// render the pagination links
-$pagination->render();
-?>
+        </tbody>
+    </table>
+    <?php
+    // render the pagination links
+    $pagination->render();
+    ?>
+</div>

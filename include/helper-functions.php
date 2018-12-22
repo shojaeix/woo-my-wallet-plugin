@@ -15,9 +15,28 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
 
     function wMyWallet_string_to_datetime(string $string): DateTime
     {
-        return DateTime::createFromFormat('Y-m-d H:i:s');
+        return DateTime::createFromFormat('Y-m-d H:i:s',$string);
     }
 
+    function wMyWallet_datetime_to_helical_string(DateTime $dateTime){
+        if(function_exists('jdate'))
+        {
+            return jdate('Y/m/d H:i:s',$dateTime->getTimestamp());
+        }
+        return $dateTime->format('Y/m/d H:i:s');
+    }
+
+    function wMyWallet_helical($time){
+        try {
+            if ($time instanceof DateTime) {
+                return wMyWallet_datetime_to_helical_string($time);
+            }
+            return wMyWallet_datetime_to_helical_string(wMyWallet_string_to_datetime($time));
+        } catch (Exception $exception){
+            doLog(__FUNCTION__ . $exception->getMessage());
+        }
+        return 'date';
+    }
     function doLog($text)
     {
         echo "<br>" . 'doLog("' . $text . '")';
@@ -149,4 +168,36 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
     function wMyWallet_get_currency_symbol(){
         return get_woocommerce_currency_symbol();
     }
+
+    function wMyWallet_shortcode_used_page_link($key){
+        return get_page_link(wMyWallet_Options::get($key));
+    }
+    function wMyWallet_short_code_used_page_exist($key) : bool {
+        return (bool)wMyWallet_Options::get($key);
+    }
+
+    function wMyWallet_validate_cart_number($card='', $irCard=true) : bool
+    {
+        $card = (string) preg_replace('/\D/','',$card);
+        $strlen = strlen($card);
+        if($irCard==true and $strlen!=16)
+            return false;
+        if($irCard!=true and ($strlen<13 or $strlen>19))
+            return false;
+        if(!in_array($card[0],[2,4,5,6,9]))
+            return false;
+
+        for($i=0; $i<$strlen; $i++)
+        {
+            $res[$i] = $card[$i];
+            if(($strlen%2)==($i%2))
+            {
+                $res[$i] *= 2;
+                if($res[$i]>9)
+                    $res[$i] -= 9;
+            }
+        }
+        return (array_sum($res)%10 == 0);
+    }
+
 }

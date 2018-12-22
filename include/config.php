@@ -7,3 +7,5 @@
  */
 
 define('wMyWallet_discount_title','کسر از کیف پول');
+
+define('wMyWallet_directory_name','woo-my-wallet-plugin');

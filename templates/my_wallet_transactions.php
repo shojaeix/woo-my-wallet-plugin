@@ -28,37 +28,60 @@ $transactions = array_slice(
     (($pagination->get_page() - 1) * $records_per_page),
     $records_per_page
 );
-
 ?>
 
+<div class="wrap" >
 
-<table>
-    <thead>
-    <th>شماره تراکنش</th>
-    <th>نوع تراکنش</th>
-    <th>مقدار</th>
-    <th>زمان</th>
-    </thead>
-    <tbody>
+    <!-- new withdrawal request button -->
+    <?php if(wMyWallet_short_code_used_page_exist('wMyWallet_withdrawal_request_form_page')){ ?>
+        <a href="<?php echo wMyWallet_shortcode_used_page_link('wMyWallet_withdrawal_request_form_page'); ?>" >
+            <button class="button button-primary">درخواست برداشت</button></a>
+    <?php } ?>
 
-    <?php
+    <!-- withdrawal requests -->
+    <?php if(wMyWallet_short_code_used_page_exist('wMyWallet_my_withdrawal_requests_page')){ ?>
+        <a href="<?php echo wMyWallet_shortcode_used_page_link('wMyWallet_my_withdrawal_requests_page'); ?>" >
+            <button class="button button-primary">لیست درخواست های برداشت</button></a>
+    <?php } ?>
+    <br><br>
+    <table>
+        <thead>
+        <th>شماره تراکنش</th>
+        <th>نوع تراکنش</th>
+        <th>مقدار</th>
+        <th>زمان</th>
+        <th>توضیحات</th>
+        <th></th>
+        </thead>
+        <tbody>
+
+        <?php
         foreach ($transactions as $transaction){
+            $class = 'wMyWallet_' . $transaction->type . '_row'
             ?>
-            <tr>
+
+            <tr class="<?php echo $class; ?>">
                 <td><?php echo $transaction->id; ?></td>
-                <td><?php echo ($transaction->type == 'subtraction') ? 'کاهش' : 'افزایش' ; ?></td>
-                <td><?php echo ($transaction->amount) . get_woocommerce_currency_symbol(); ?>   </td>
-                <td><?php echo ($transaction->created_at); //todo | convert date ?></td>
+                <td><?php echo ($transaction->type == 'subtraction') ? 'برداشت' : 'واریز' ; ?></td>
+                <td><?php echo ($transaction->amount) . ' ' . get_woocommerce_currency_symbol(); ?>   </td>
+                <td><?php echo wMyWallet_helical($transaction->created_at); ?></td>
+                <td><?php echo ($transaction->description); ?></td>
+
+                <td><?php if(isset($transaction->order_link)){ ?>
+                    <a href="<?php echo $transaction->order_link; ?>"><button class="button button-small" >مشاهده سفارش</button> </a>
+                <?php } ?></td>
             </tr>
-    <?php
+
+            <?php
         }
+        ?>
+
+        </tbody>
+    </table>
+
+    <?php
+    // render the pagination links
+    $pagination->render();
     ?>
 
-    </tbody>
-</table>
-
-<?php
-// render the pagination links
-$pagination->render();
-?>
-
+</div>

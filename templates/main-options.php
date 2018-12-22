@@ -11,9 +11,10 @@ if (!isset($args['deposit-product-id'])) {
 if(!isset($args['withdrawal-min'])){
     $args['withdrawal-min'] = '';
 }
+
 ?>
 
-<h1>گوی است دوای هرچه درد است</h1>
+<h1>تنظیمات «پلاگین کیف پول من»</h1>
 <form method="post">
     <table class="table">
         <tbody>
@@ -23,7 +24,38 @@ if(!isset($args['withdrawal-min'])){
         </tr>
         <tr>
             <td><label>حداقل موجودی جهت درخواست برداشت وجه</label></td>
-            <td><input type="number" name="withdrawal-min" value="<?php echo $args['withdrawal-min']; ?>"></td>
+            <td><input type="number" name="withdrawal-min" value="<?php echo $args['withdrawal-min']; ?>"> <?php echo wMyWallet_get_currency_symbol(); ?></td>
+        </tr>
+        <tr><td><br></td></tr>
+        <tr>
+            <td colspan="2"><h3>صفحاتی که شورتکد هارا در آنها قرار داده اید را انتخاب کنید.</h3></td>
+        </tr>
+        <tr>
+            <td>صفحه درخواست برداشت</td>
+            <td><?php wp_dropdown_pages([
+                    'show_option_none' => ' -- ',
+                    'name' => 'wMyWallet_withdrawal_request_form_page',
+                    'selected' => $args['wMyWallet_withdrawal_request_form_page'],
+            ]); ?>
+            </td>
+        </tr>
+        <tr>
+            <td>صفحه لیست تراکنش ها</td>
+            <td><?php wp_dropdown_pages([
+                    'show_option_none' => ' -- ',
+                    'name' => 'wMyWallet_my_wallet_transactions_page',
+                    'selected' => $args['wMyWallet_my_wallet_transactions_page'],
+                ]); ?>
+            </td>
+        </tr>
+        <tr>
+            <td>صفحه لیست درخواست های برداشت</td>
+            <td><?php wp_dropdown_pages([
+                    'show_option_none' => ' -- ',
+                    'name' => 'wMyWallet_my_withdrawal_requests_page',
+                    'selected' => $args['wMyWallet_my_withdrawal_requests_page'],
+                ]); ?>
+            </td>
         </tr>
         <tr>
             <td>

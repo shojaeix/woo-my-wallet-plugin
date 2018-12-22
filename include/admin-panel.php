@@ -8,39 +8,51 @@
 
 add_action('admin_menu', 'wMyWallet_add_admin_menu_pages');
 
-function wMyWallet_add_admin_menu_pages(){
+function wMyWallet_add_admin_menu_pages()
+{
 
     // main menu
-    add_menu_page( null, 'کیف پول من',
-        null, 'wmywallet-main-menu', null );
+    add_menu_page(null, 'کیف پول من',
+        null, 'wmywallet-main-menu', null);
+
+    // transaction info
+    add_submenu_page('wmywallet-main-menu', 'تراکنش ها', 'تراکنش ها', 'manage_options'
+        , 'wmywallet-transaction-info'
+        , 'wMyWallet_transaction_info');
 
     // new transaction
-    add_submenu_page('wmywallet-main-menu','+ تراکنش کیف پول','تراکنش جدید','manage_options'
-        ,'wmywallet-new-transaction-page'
-        ,'wmywallet_new_transaction_page');
+    add_submenu_page('wmywallet-main-menu', '+ تراکنش کیف پول', 'تراکنش جدید', 'manage_options'
+        , 'wmywallet-new-transaction-page'
+        , 'wmywallet_new_transaction_page');
+
+
+
+
+
+    // transaction info
+    add_submenu_page('wmywallet-main-menu', 'لیست درخواست های برداشت', 'درخواست های برداشت'
+        , 'manage_options'
+        , 'wmywallet-withdarawal-requests-list'
+        , 'wMywallet_withdrawal_requests_list');
+
+    // transaction info
+    add_submenu_page(null, 'جزئیات درخواست', null
+        , 'manage_options'
+        , 'wMyWallet-withdrawal-request-info'
+        , 'wMyWallet_withdrawal_request_info');
 
     // setting
-    add_submenu_page('wmywallet-main-menu','تنظیمات کیف پول کاربران','تنظیمات'
-        ,'manage_options'
-        ,'wmywallet-main-options'
-        ,'wMyWallet_main_options_page');
+    add_submenu_page('wmywallet-main-menu', 'تنظیمات کیف پول کاربران', 'تنظیمات'
+        , 'manage_options'
+        , 'wmywallet-main-options'
+        , 'wMyWallet_main_options_page');
+    // setting
+    add_submenu_page('options', 'تنظیمات کیف پول کاربران', 'تنظیمات'
+        , 'manage_options'
+        , 'wmywallet-main-options'
+        , 'wMyWallet_main_options_page');
 
-    // transaction info
-    add_submenu_page('wmywallet-main-menu','مشاهده تراکنش','مشاهده تراکنش','manage_options'
-        ,'wmywallet-transaction-info'
-        ,'wMyWallet_transaction_info');
-
-    // transaction info
-    add_submenu_page('wmywallet-main-menu','لیست درخواست های برداشت','درخواست های برداشت'
-        ,'manage_options'
-        ,'wmywallet-withdarawal-requests-list'
-        ,'wMywallet_withdrawal_requests_list');
-
-    // transaction info
-    add_submenu_page(null,'جزئیات درخواست',null
-        ,'manage_options'
-        ,'wMyWallet-withdrawal-request-info'
-        ,'wMyWallet_withdrawal_request_info');
+    
 }
 
 /**
@@ -58,7 +70,7 @@ function wMyWallet_main_options_page()
             // cast input deposit-product-id to integer
             $deposit_product_id = (int)htmlspecialchars($_POST['deposit-product-id']);
 
-            if($deposit_product_id != wMyWallet_Options::get('deposit-product-id')) {
+            if ($deposit_product_id != wMyWallet_Options::get('deposit-product-id')) {
                 // deactive deposit product if it's zero
                 if ($deposit_product_id === 0) {
                     wMyWallet_show_admin_notice('شارژ کیف پول غیر فعال شد.');
@@ -82,9 +94,9 @@ function wMyWallet_main_options_page()
 
         }
         // apply new value for minimum withdrawal request
-        if (isset($_POST['withdrawal-min']) and is_numeric($_POST['withdrawal-min'])) {
+        if (isset($_POST['withdrawal-min']) and (is_numeric($_POST['withdrawal-min']))) {
             $min = (int)htmlspecialchars($_POST['withdrawal-min']);
-            if($min != wMyWallet_Options::get('withdrawal-min')) {
+            if ($min != wMyWallet_Options::get('withdrawal-min')) {
                 if ($min <= 0) {
                     wMyWallet_show_admin_error('مقدار حداقل موچودی جهت درخواست برداشت نامعتبر است.');
                 } else {
@@ -96,6 +108,22 @@ function wMyWallet_main_options_page()
                 }
             }
         }
+        // set pages
+        $pages_list = [
+            'wMyWallet_withdrawal_request_form_page' => 'صفحه درخواست برداشت',
+            'wMyWallet_my_wallet_transactions_page' => 'صفحه لیست تراکنش ها',
+            'wMyWallet_my_withdrawal_requests_page' => 'صفحه لیست درخواست های برداشت',
+        ];
+        foreach ($pages_list as $key => $title){
+            if(isset($_POST[$key]) and (is_numeric($_POST[$key])  or $_POST[$key] == '' )){
+                $page = (int)$_POST[$key];
+                if(wMyWallet_Options::set($key,$page))
+                {
+                    wMyWallet_show_admin_notice("صفحه «$title» با موفقیت بروزرسانی شد.");
+                }
+            }
+        }
+
     } catch (Exception $exception) {
         wMyWallet_show_admin_error($exception->getMessage());
     }
@@ -103,7 +131,10 @@ function wMyWallet_main_options_page()
     wMyWallet_render_template('main-options', [
         'deposit-product-id' => wMyWallet_Options::get('deposit-product-id'),
         'withdrawal-min' => wMyWallet_Options::get('withdrawal-min'),
-    ],false);
+        'wMyWallet_withdrawal_request_form_page' => ((bool)(wMyWallet_Options::get('wMyWallet_withdrawal_request_form_page'))) ? wMyWallet_Options::get('wMyWallet_withdrawal_request_form_page') : null,
+        'wMyWallet_my_wallet_transactions_page' =>((bool)(wMyWallet_Options::get('wMyWallet_my_wallet_transactions_page'))) ? wMyWallet_Options::get('wMyWallet_my_wallet_transactions_page') : null,
+        'wMyWallet_my_withdrawal_requests_page' => ((bool)(wMyWallet_Options::get('wMyWallet_my_withdrawal_requests_page'))) ? wMyWallet_Options::get('wMyWallet_my_withdrawal_requests_page') : null,
+    ], false);
 }
 
 // new transaction page
@@ -141,22 +172,22 @@ function wmywallet_new_transaction_page()
         $validated = false;
     }
 
-    if (!isset($_POST['description']) or !is_string($_POST['description']) or strlen($_POST['description']) < 20) {
+    if (!isset($_POST['description']) or !is_string($_POST['description']) or strlen($_POST['description'])<1) {
         if (isset($_POST['description']))
-            wMyWallet_show_admin_error('لطفا حداقل ۲۰ حرف به عنوان توضیحات وارد کنید.');
+            wMyWallet_show_admin_error('لطفا حداقل ۱ حرف به عنوان توضیحات وارد کنید.');
         $validated = false;
     }
 
 
     // show form if not validated
-    if (!$validated) {
+    if (!$validated or (isset($_POST['edit']) and is_numeric($_POST['edit']) and (int)$_POST['edit'] == 2)) {
         return wMyWallet_render_template('new_transaction_form', $args, false);
     }
 
     $validated_data = [
         'amount' => $_POST['amount'],
         'type' => $_POST['type'],
-        'description' => $_POST['description'],
+        'description' => (!in_array($_POST['description'],['.','-'])) ? $_POST['description'] : '',
     ];
 
 
@@ -241,6 +272,7 @@ function wMyWallet_transaction_info()
     if (is_null($transaction)) {
         wMyWallet_show_admin_error('شناسه تراکنش نامعتبر است.');
 
+        return wMyWallet_all_transactions_page();
         return wMyWallet_render_template('transaction_info_form', [], false);
     }
     return wMyWallet_render_template('transaction_info', [
@@ -253,6 +285,16 @@ function wMyWallet_transaction_info()
 function wMyWallet_all_transactions_page()
 {
     $transactions = wMyWallet_get_all_transactions();
+
+    $count = count($transactions);
+    for($i=0; $i<$count; $i++){
+
+        if(isset($transactions[$i]->order_id) and is_numeric($transactions[$i]->order_id) and $transactions[$i]->order_id > 0)
+        {
+            $transactions[$i]->order_link = get_edit_post_link($transactions[$i]->order_id);
+        }
+    }
+
     $args = [
         'transactions' => $transactions,
     ];
@@ -263,16 +305,18 @@ function wMyWallet_all_transactions_page()
 }
 
 // withdrawal requests page
-function wMywallet_withdrawal_requests_list(){
-    wMyWallet_render_template('withdrawal-requests-list',[
+function wMywallet_withdrawal_requests_list()
+{
+    wMyWallet_render_template('withdrawal-requests-list', [
         'widthrawals' => wMyWallet_get_all_withdrawal_requests(),
-    ],false);
+    ], false);
 }
 
-function wMyWallet_withdrawal_request_info(){
+function wMyWallet_withdrawal_request_info()
+{
     $widthrawal_id = (isset($_GET['withdrawal_id']) and is_numeric($_GET['withdrawal_id'])) ? (int)$_GET['withdrawal_id'] : null;
 
-    if($widthrawal_id == null){
+    if ($widthrawal_id == null) {
         wMyWallet_show_admin_error('آیدی درخواست وارد نشده است.');
         return;
     }
@@ -281,29 +325,30 @@ function wMyWallet_withdrawal_request_info(){
     select * from ' . wMyWallet_widthrawal_requests_table_name() . ' where id=' . $widthrawal_id);
     $widthrawal = (count($rows)) ? $rows[0] : null;
 
-    if(is_null($widthrawal)){
+    if (is_null($widthrawal)) {
         wMyWallet_show_admin_error('آیدی درخواست وارد شده نامعتبر است.' . $widthrawal_id);
         return;
     }
 
     // update admin description if needed
-    if(isset($_POST['admin_description'])){
+    if (isset($_POST['admin_description'])) {
         $new_admin_description = htmlspecialchars($_POST['admin_description']);
-        if($new_admin_description != $widthrawal->admin_description){
+        if ($new_admin_description != $widthrawal->admin_description) {
             $widthrawal->admin_description = $new_admin_description;
-                wMyWallet_update_withdrawal_request($widthrawal_id,[
-                    'admin_description' => $new_admin_description,
-                ]);
+            wMyWallet_update_withdrawal_request($widthrawal_id, [
+                'admin_description' => $new_admin_description,
+            ]);
         }
     }
 
     // update admin description if needed
-    if(isset($_POST['paid']) and is_numeric($_POST['paid']) and (int)$_POST['paid'] === 2){
-        if($widthrawal->status != 'paid'){
+    if (isset($_POST['paid']) and is_numeric($_POST['paid']) and (int)$_POST['paid'] === 2) {
+        if ($widthrawal->status != 'paid') {
             $widthrawal->status = 'paid';
-            wMyWallet_update_withdrawal_request($widthrawal_id,[
+            $widthrawal->paid_at = wMyWallet_datetime_to_string(new DateTime());
+            wMyWallet_update_withdrawal_request($widthrawal_id, [
                 'status' => 'paid',
-                'paid_at' => wMyWallet_datetime_to_string(new DateTime()),
+                'paid_at' => $widthrawal->paid_at,
             ]);
         }
     }

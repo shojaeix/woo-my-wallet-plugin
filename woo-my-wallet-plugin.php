@@ -9,7 +9,7 @@ Description:  Add wallet to woocommerce users with basic abilities
 define('wMyWallet_ROOT', __DIR__);
 
 require_once 'vendor/autoload.php';
-// load include directory files
+// load include directory files, config first
 if (is_file(__DIR__ . '/include/' . 'config.php'))
     require_once(__DIR__ . '/include/' . 'config.php');
 
@@ -21,6 +21,10 @@ if (count($include_files)) {
             require_once(__DIR__ . '/include/' . $include_file);
     }
 }
+
+
+// load style.css
+//wp_enqueue_style( 'wMyWallet_style', plugins_url(wMyWallet_directory_name . '/style.css') );
 
 // Activation
 register_activation_hook(__FILE__, 'wMyWallet_activation');
@@ -40,6 +44,7 @@ function wMyWallet_activation()
        `user_id` INT UNSIGNED NOT NULL ,
        `old_amount` INT UNSIGNED NOT NULL ,
        `new_amount` INT UNSIGNED NOT NULL ,
+       `order_id` INT UNSIGNED NULL ,
        `description` TEXT NULL ,
         PRIMARY KEY (`id`)
     ) $charset_collate;";

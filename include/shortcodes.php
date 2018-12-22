@@ -15,9 +15,22 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
         $my_transactions = wMyWallet_DBHelper::select('
         select * from ' . wMyWallet_DBHelper::wpdb()->prefix . wMyWallet_DBHelper::prefix . 'transactions
          where user_id=' . $user_id . ' ORDER BY created_at DESC');
+
+        $count = count($my_transactions);
+         for($i=0; $i<$count; $i++){
+
+            if(isset($my_transactions[$i]->order_id))
+            {
+                $order = new WC_Order($my_transactions[$i]->order_id);
+                $my_transactions[$i]->order_link = $order->get_view_order_url();
+            }
+        }
+
         $args = [
             'transactions' => $my_transactions,
         ];
+
+
         return wMyWallet_render_template('my_wallet_transactions', $args);
     }
 
@@ -33,6 +46,22 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
     add_shortcode('wMyWallet_show_withdrawal_request_form', 'wMyWallet_show_withdrawal_request_form');
     function wMyWallet_show_withdrawal_request_form()
     {
+
+
+        $wallet = wMyWallet_Wallet::getUserWallet(get_current_user_id());
+
+        if($wallet->get_amount() < min((int)wMyWallet_Options::get('withdrawal-min'),1)){
+            return 'موجودی کیف پول شما کمتر از حداقل مجاز است.';
+        }
+
+
+// show form if not validated
+        if (!isset($_POST['submit'])) {
+            return wMyWallet_render_template('withdrawal_request_form_for_customer',[
+                'errors' => [],
+            ]);
+        }
+
         // validate input
         $required_fields_list = [
             'amount',
@@ -52,6 +81,7 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
         } else {
             $validated_data['amount'] = $_POST['amount'];
         }
+
         // validate transfer_type
         if (!isset($_POST['transfer_type'])) {
             array_push($errors, 'نوع واریز را انتخاب کنید.');
@@ -60,20 +90,21 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
         } else {
             $validated_data['transfer_type'] = htmlspecialchars($_POST['transfer_type']);
         }
+
         // validate cart and account number
         if (isset($validated_data['transfer_type'])) {
             switch ($validated_data['transfer_type']) {
                 case 'cart_to_cart':
-                    if (!isset($_POST['cart_number'])) {
+                    if (!isset($_POST['cart_number']) ) {
                         array_push($errors, 'شماره کارت وارد نشده است.');
-                    } else if (!is_numeric($_POST['cart_number'])) {
+                    } else if (!is_numeric($_POST['cart_number']) or !wMyWallet_validate_cart_number($_POST['cart_number'])) {
                         array_push($errors, 'شماره کارت نامعتبر است.');
                     } else {
                         $validated_data['cart_number'] = $_POST['cart_number'];
                     }
                     break;
                 case 'permanent':
-                    if (!isset($_POST['account_number'])) {
+                    if (!isset($_POST['account_number']) ) {
                         array_push($errors, 'شماره حساب وارد نشده است.');
                     } else if (!is_numeric($_POST['account_number'])) {
                         array_push($errors, 'شماره حساب نامعتبر است.');
@@ -107,7 +138,6 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
         }
 
         if($validated){
-            $wallet = wMyWallet_Wallet::getUserWallet(get_current_user_id());
             if($validated_data['amount'] > $wallet->get_amount()){
                 array_push($errors, 'مبلغ درخواست از موجودی کیف پول بیشتر است');
                 $validated = false;

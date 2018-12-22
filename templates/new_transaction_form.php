@@ -7,25 +7,55 @@
  */
 $user = $args['user'];
 ?>
-<br>
-نام کاربر: <?php echo $user->user_nicename;
-// todo | show user phone number ?>
-<form method="post">
+<div class="" >
 
-    <input name="user_id" value="<?php echo $user->ID; ?>" hidden>
-<br>    مقدار <input name="amount" type="number" value="<?php echo isset($_POST['amount']) ? $_POST['amount'] : ''; ?>" >
-<br>نوع تراکنش
-    <select name="type" >
-        <option> - </option>
-        <option value="subtraction" >کاهش</option>
-        <option value="addition" >افزایش</option>
-    </select>
-<br>
-    توضیحات<input type="text" name="description" value="<?php echo isset($_POST['description']) ? $_POST['description'] : ''; ?>" >
-   <br> <button type="submit" class="button-primary">ایجاد</button>
-</form>
+    <h1>ایجاد تراکنش جدید</h1>
+    <form method="post">
+        <table>
+            <thead>
+            <th></th>
+            <th></th>
+            </thead>
+            <tbody>
+            <tr>
+                <td>نام کاربر:</td>
+                <td><?php echo $user->user_nicename;
+                    // todo | show user phone number ?></td>
+            </tr>
+            <tr>
+                <td>مقدار:</td>
+                <td><input name="amount" type="text" value="<?php echo isset($_POST['amount']) ? $_POST['amount'] : ''; ?>" >
+                    <?php echo wMyWallet_get_currency_symbol(); ?></td>
+            </tr>
+            <tr>
+                <td>نوع:</td>
+                <td><select name="type" >
+                        <option> - </option>
+                        <option value="subtraction" <?php echo (isset($_POST['type']) and $_POST['type']=='subtraction') ? 'selected' : '' ; ?>>کاهش</option>
+                        <option value="addition" <?php echo (isset($_POST['type']) and $_POST['type']=='addition') ? 'selected' : '' ; ?>>افزایش</option>
+                    </select></td>
+            </tr>
+            <tr>
+                <td>توضیحات:</td>
+                <td><textarea type="text" name="description" ><?php echo isset($_POST['description']) ? $_POST['description'] : ''; ?></textarea>
 
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td> <button type="submit" class="button button-primary">ایجاد</button>
+                    <button type="submit"  form="change_user_id" class="button button-cancel" >تغیر شناسه کاربر</button>
+                </td>
 
-<?php
-// var_dump($user);
-?>
+            </tr>
+
+            </tbody>
+        </table>
+        <input name="user_id" value="<?php echo $user->ID; ?>" hidden>
+    </form>
+
+    <form id="change_user_id" >
+        <input type="hidden" name="page" value="wmywallet-new-transaction-page" >
+    </form>
+
+</div>

@@ -16,6 +16,11 @@ class wMyWallet_Options
     private static $options_list = [
         'deposit-product-id' => 'string',
         'withdrawal-min' => 'string',
+
+        // pages list
+        'wMyWallet_withdrawal_request_form_page' => 'string',
+        'wMyWallet_my_wallet_transactions_page' => 'string',
+        'wMyWallet_my_withdrawal_requests_page' => 'string',
     ];
     private static $default_values = [
         'deposit-product-id' => 0,
@@ -62,7 +67,7 @@ class wMyWallet_Options
     public static function set(string $key, $value)
     {
         if(self::get($key) == $value){
-            return true;
+            return false;
         }
 
         self::$data[$key] = $value;
