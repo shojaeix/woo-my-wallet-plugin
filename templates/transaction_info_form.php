@@ -5,6 +5,7 @@
  * Date: 12/17/2018
  * Time: 16:58
  */
+defined('ABSPATH') or die;
 ?>
 <h1>جستجو در تراکنش ها</h1>
 <form method="get">

@@ -6,6 +6,8 @@
  * Time: 10:32
  */
 
+defined('ABSPATH') or die;
+
 class wMyWallet_Options
 {
     /**

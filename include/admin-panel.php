@@ -6,6 +6,8 @@
  * Time: 16:03
  */
 
+defined('ABSPATH') or die;
+
 add_action('admin_menu', 'wMyWallet_add_admin_menu_pages');
 
 function wMyWallet_add_admin_menu_pages()
@@ -93,11 +95,11 @@ function wMyWallet_main_options_page()
         if (isset($_POST['withdrawal-min']) and (is_numeric($_POST['withdrawal-min']))) {
             $min = (int)htmlspecialchars($_POST['withdrawal-min']);
             if ($min != wMyWallet_Options::get('withdrawal-min')) {
-                if ($min <= 0) {
+                if ($min < 0) {
                     wMyWallet_show_admin_error('مقدار حداقل موچودی جهت درخواست برداشت نامعتبر است.');
                 } else {
                     if ((bool)wMyWallet_Options::set('withdrawal-min', $min)) {
-                        wMyWallet_show_admin_notice('حداقل موجودی جهت درخواست برداشت به ' . $min . ' تغیر کرد.');
+                        wMyWallet_show_admin_notice('حداقل موجودی جهت درخواست برداشت به ' . $min . ' تغییر کرد.');
                     } else {
                         wMyWallet_show_admin_error('بروزرسانی حداقل درخواست برداشت ناموفق بود.');
                     }
@@ -183,7 +185,7 @@ function wmywallet_new_transaction_page()
     $validated_data = [
         'amount' => $_POST['amount'],
         'type' => $_POST['type'],
-        'description' => (!in_array($_POST['description'],['.','-'])) ? $_POST['description'] : '',
+        'description' =>$_POST['description'],
     ];
 
 
@@ -201,6 +203,7 @@ function wmywallet_new_transaction_page()
     if (!$confirm) {
         return wMyWallet_render_template('new_transaction_confirm', $args, false); // show confirm page
     }
+
     // created new transaction if confirmed
 
     $old_amount = $wallet->get_amount();
@@ -232,7 +235,9 @@ function wmywallet_new_transaction_page()
         $validated_data['type'],
         $old_amount,
         $new_amount,
-        $validated_data['description']
+        $validated_data['description'],
+        null,
+        0
     );
 
     $transaction = wMyWallet_get_transaction($transaction_id);

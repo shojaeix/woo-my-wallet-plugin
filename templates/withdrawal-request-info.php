@@ -5,6 +5,8 @@
  * Date: 12/19/2018
  * Time: 09:38
  */
+defined('ABSPATH') or die;
+
 $withdrawal = $args['withdrawal'];
 ?>
 

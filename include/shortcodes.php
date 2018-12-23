@@ -6,6 +6,8 @@
  * Time: 15:43
  */
 
+defined('ABSPATH') or die;
+
 if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
     // my wallet transactions page
     add_shortcode('wMyWallet_my_wallet_transactions', 'wMyWallet_show_my_wallet_transactions');
@@ -38,7 +40,7 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
     add_shortcode('wMyWallet_my_wallet_amount', 'wMyWallet_my_wallet_amount');
     function wMyWallet_my_wallet_amount()
     {
-        return wMyWallet_Wallet::getUserWalletAmount(get_current_user_id()) . get_woocommerce_currency_symbol();
+        return wMyWallet_Wallet::getUserWalletAmount(get_current_user_id())  . ' ' . get_woocommerce_currency_symbol();
     }
 
 
@@ -50,10 +52,14 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
 
         $wallet = wMyWallet_Wallet::getUserWallet(get_current_user_id());
 
-        if($wallet->get_amount() < min((int)wMyWallet_Options::get('withdrawal-min'),1)){
-            return 'موجودی کیف پول شما کمتر از حداقل مجاز است.';
+       //if($wallet->get_amount() < min((int)wMyWallet_Options::get('withdrawal-min'),0)){
+        if($wallet->get_amount() < (int)wMyWallet_Options::get('withdrawal-min')){
+            return 'موجودی کیف پول شما کمتر از حداقل مجاز(' . ((int)wMyWallet_Options::get('withdrawal-min')) . ') است.';
         }
 
+        if($wallet->get_amount() <= 0){
+            return 'موجودی کیف پول کافی نیست.';
+        }
 
 // show form if not validated
         if (!isset($_POST['submit'])) {
@@ -154,8 +160,11 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
         $old_amount = $wallet->get_amount();
 
         try{
-            if($wallet->minus_amount($validated_data['amount']) == false){
-                return;
+            if($wallet->minus_amount($validated_data['amount']) === false){
+                array_push($errors,'امکان کسر این مبلغ از موجودی شما(' . $old_amount . ' ' . wMyWallet_get_currency_symbol() . ') وجود ندارد');
+                return wMyWallet_render_template('withdrawal_request_form_for_customer',[
+                    'errors' => $errors,
+                ]);
             }
             $wallet->save();
         } catch (Exception $exception){
@@ -175,9 +184,11 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
             'subtraction',
             $old_amount,
             $new_amount,
-            'کسر موجودی به موجب درخواست برداشت وجه شماره ' . $withdrawal_id);
+            'کسر موجودی به موجب درخواست برداشت وجه شماره ' . $withdrawal_id ,null ,0);
 
-        return 'درخواست شما با موفقیت ثبت شد. شماره درخواست: ' . $withdrawal_id;
+        return 'درخواست شما با موفقیت ثبت شد. شماره درخواست: ' . $withdrawal_id
+            . '<br><br>'
+            . wMyWallet_render_template('buttons');
 
     }
 

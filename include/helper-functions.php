@@ -6,6 +6,8 @@
  * Time: 14:35
  */
 
+defined('ABSPATH') or die;
+
 if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_loaded) {
 
     function wMyWallet_datetime_to_string(DateTime $dateTime)

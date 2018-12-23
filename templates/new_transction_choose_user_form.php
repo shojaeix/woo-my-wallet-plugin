@@ -4,7 +4,9 @@
  * User: Almasvareh
  * Date: 12/17/2018
  * Time: 14:12
- */?>
+ */
+defined('ABSPATH') or die;
+?>
 <h1>ایجاد تراکنش جدید</h1>
 <br>
 <h3>انتخاب کاربر</h3>

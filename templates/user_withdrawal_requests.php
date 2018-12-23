@@ -5,6 +5,8 @@
  * Date: 12/18/2018
  * Time: 15:24
  */
+defined('ABSPATH') or die;
+
 $requests = isset($args['requests']) ? $args['requests'] : [];
 
 
@@ -61,7 +63,7 @@ $statuses_trans = [
         <thead>
         <th>شماره درخواست</th>
         <th>وضعیت</th>
-        <th>مقدار</th>
+        <th>مبلغ<?php echo ' (' . wMyWallet_get_currency_symbol() . ')'; ?></th>
         <th>توضیحات شما</th>
         <th>تاریخ درخواست</th>
         <th>تاریخ واریز</th>
@@ -82,6 +84,7 @@ $statuses_trans = [
         ?>
         </tbody>
     </table>
+
     <?php
     // render the pagination links
     $pagination->render();

@@ -5,6 +5,10 @@
  * Date: 12/17/2018
  * Time: 11:24
  */
+
+defined('ABSPATH') or die;
+
+
 $transactions = isset($args['transactions']) ? $args['transactions'] : [] ;
 
 // records should be displayed on a page
@@ -48,7 +52,7 @@ $transactions = array_slice(
         <thead>
         <th>شماره تراکنش</th>
         <th>نوع تراکنش</th>
-        <th>مقدار</th>
+        <th>مبلغ <?php echo ' (' . wMyWallet_get_currency_symbol() . ')'; ?> </th>
         <th>زمان</th>
         <th>توضیحات</th>
         <th></th>

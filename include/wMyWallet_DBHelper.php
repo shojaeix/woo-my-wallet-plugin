@@ -6,6 +6,8 @@
  * Time: 14:37
  */
 
+defined('ABSPATH') or die;
+
 class wMyWallet_DBHelper
 {
 

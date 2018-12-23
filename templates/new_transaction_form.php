@@ -5,6 +5,8 @@
  * Date: 12/17/2018
  * Time: 13:58
  */
+defined('ABSPATH') or die;
+
 $user = $args['user'];
 ?>
 <div class="" >
@@ -44,7 +46,7 @@ $user = $args['user'];
             <tr>
                 <td></td>
                 <td> <button type="submit" class="button button-primary">ایجاد</button>
-                    <button type="submit"  form="change_user_id" class="button button-cancel" >تغیر شناسه کاربر</button>
+                    <button type="submit"  form="change_user_id" class="button button-cancel" >تغییر شناسه کاربر</button>
                 </td>
 
             </tr>

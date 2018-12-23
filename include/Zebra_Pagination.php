@@ -1,4 +1,5 @@
 <?php
+defined('ABSPATH') or die;
 
 /**
  *  A generic, Twitter Bootstrap compatible (both 3 and 4), pagination script that automatically generates navigation links
@@ -14,6 +15,7 @@
  *  @license    http://www.gnu.org/licenses/lgpl-3.0.txt GNU LESSER GENERAL PUBLIC LICENSE
  *  @package    Zebra_Pagination
  */
+
 class Zebra_Pagination {
 
     // set defaults and initialize some private variables

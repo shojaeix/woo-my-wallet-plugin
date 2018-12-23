@@ -5,6 +5,8 @@
  * Date: 12/16/2018
  * Time: 09:04
  */
+
+defined('ABSPATH') or die;
 if (!isset($args['deposit-product-id'])) {
     $args['deposit-product-id'] = '';
 }
@@ -19,7 +21,7 @@ if(!isset($args['withdrawal-min'])){
     <table class="table">
         <tbody>
         <tr>
-            <td><label>شماره محصول مخصوص جهت شارژ موجودی کیف پول</label></td>
+            <td><label>شناسه محصول شارژ کیف پول</label></td>
             <td><input type="number" name="deposit-product-id" value="<?php echo $args['deposit-product-id']; ?>"></td>
         </tr>
         <tr>
@@ -28,7 +30,7 @@ if(!isset($args['withdrawal-min'])){
         </tr>
         <tr><td><br></td></tr>
         <tr>
-            <td colspan="2"><h3>صفحاتی که شورتکد هارا در آنها قرار داده اید را انتخاب کنید.</h3></td>
+            <td colspan="2"><h3>صفحاتی که شورتکد هارا در آنها قرار داده اید انتخاب کنید.</h3></td>
         </tr>
         <tr>
             <td>صفحه درخواست برداشت</td>
@@ -40,7 +42,7 @@ if(!isset($args['withdrawal-min'])){
             </td>
         </tr>
         <tr>
-            <td>صفحه لیست تراکنش ها</td>
+            <td>صفحه لیست تراکنش های کیف پول</td>
             <td><?php wp_dropdown_pages([
                     'show_option_none' => ' -- ',
                     'name' => 'wMyWallet_my_wallet_transactions_page',

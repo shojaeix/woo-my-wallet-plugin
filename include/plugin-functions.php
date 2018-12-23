@@ -1,9 +1,11 @@
 <?php
 
+defined('ABSPATH') or die;
+
 // ckeck for duplicate
 if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
 
-    function wMyWallet_insert_new_transaction($user_id, $amount, $type, $old_amount, $new_amount, $description = '', $created_at = null)
+    function wMyWallet_insert_new_transaction($user_id, $amount, $type, $old_amount, $new_amount, $description = '', $created_at = null,$order_id = 0)
     {
         // create created_at if is null
         if ($created_at == null) {
@@ -26,6 +28,7 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
             'new_amount' => $new_amount,
             'description' => $description,
             'created_at' => $created_at,
+            'order_id' => $order_id,
         ];
         try {
             return wMyWallet_DBHelper::insert(wMyWallet_DBHelper::wpdb()->prefix . wMyWallet_DBHelper::prefix . 'transactions', $data);
@@ -110,24 +113,41 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
     */
 
     add_action('woocommerce_cart_calculate_fees', 'wMyWallet_add_grant_discount', 999);
-    function wMyWallet_add_grant_discount($cart)
+    function wMyWallet_add_grant_discount(WC_Cart $cart)
     {
+
+        //return if product is deposit product or child of that.
+        $items = $cart->get_cart();
+
+        foreach ($items as $item_product) {
+
+            // get item product data
+            $item_product_data = $item_product;
+            $variation_id = $item_product_data['variation_id'];
+            $parent_product_id = $item_product_data['product_id'];
+            // choose between variation_id
+            $product_id = $variation_id > 0 ? $variation_id : $parent_product_id;
+
+            // continue if product is not in deposit products list
+            if (in_array($parent_product_id, wMyWallet_Options::get_array('deposit-product-id'))) {
+                return;
+            }
+        }
+
 
         $cart_sub_total = $cart->cart_contents_total + $cart->shipping_total;
         $user_balance = wMyWallet_Wallet::getUserWalletAmount(get_current_user_id());
 
         $discount = min($user_balance, $cart_sub_total);
 
-        // return if product is deposit product or child of that.
         // add discount
         if ($discount > 0)
-            $cart->add_fee(wMyWallet_discount_title, -1 * $discount); // todo | replace text with constant
+            $cart->add_fee(wMyWallet_discount_title, -1 * $discount);
     }
 
     add_action('woocommerce_payment_complete', 'wMyWallet_grant_discount_order_status_completed');
     function wMyWallet_grant_discount_order_status_completed($order_id)
     {
-        doLog(__FUNCTION__ . ' line: ' . __LINE__);
         $order = new WC_Order($order_id);
         // find discount field in order fees and add to $grant_used
         $order_fees = $order->get_fees();
@@ -141,9 +161,8 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
         if ($grant_used == 0) return;
         //create transaction
         $amount = $grant_used * -1;
-        $description = "کسر هزینه سفارش: <a href='"
-            . get_bloginfo('url')
-            . "/my-account/view-order/{$order_id}'>{$order_id}</a>";
+        $description = "کسر هزینه سفارش {$order_id}"
+ ;
         $member_id = get_current_user_id();
         /*
         $post = array(
@@ -176,10 +195,7 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
         $new_user_balance = $wallet->get_amount();
 
         wMyWallet_insert_new_transaction($member_id, $amount, 'subtraction'
-            , $old_user_balance, $new_user_balance, $description);
-
-
-        doLog(__FUNCTION__ . ' line: ' . __LINE__);
+            , $old_user_balance, $new_user_balance, $description,null,$order_id);
     }
 
     // deposit by deposit-product
@@ -238,7 +254,9 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
                 'addition',
                 $old_amount,
                 $new_amount,
-                'شارژ کیف پول از طریق سفارش شماره ' . $order_id
+                'شارژ کیف پول از طریق خرید کارت شارژ',
+                null,
+                $order_id
             );
         }
 
@@ -262,7 +280,7 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
              */
             foreach ($items as $item) {
                 if ($item['product_id'] == $deposit_product_id) {
-                    wc_add_notice('شارژ کیف پول همراه با خرید محصولات دیگر امکان پذیر نیست. لطفا چیز کنید.', 'error');
+                    wc_add_notice('شارژ کیف پول همراه با خرید محصولات دیگر امکان پذیر نیست. لطفا شارژ و یا اقلام دیگر را حذف کنید.', 'error');
                 }
             }
         }

@@ -6,6 +6,7 @@
  * Time: 14:25
  */
 
+defined('ABSPATH') or die;
 
 class wMyWallet_Wallet
 {
@@ -67,13 +68,13 @@ class wMyWallet_Wallet
 
     function minus_amount(int $number)
     {
-        if ($number < 1) {
+        if ($number <= 0) {
             return false;
         }
 
         $this->get_amount_from_db_if_is_not_set();
 
-        $new_amount = $this->amount - $number;
+        $new_amount = (int)($this->amount - $number);
 
         if ($new_amount < 0) {
             return false;

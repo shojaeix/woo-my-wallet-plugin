@@ -5,6 +5,7 @@
  * Date: 12/15/2018
  * Time: 16:19
  */
+defined('ABSPATH') or die;
 
 var_dump($args);
 ?>

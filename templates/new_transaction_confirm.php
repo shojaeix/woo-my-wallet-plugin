@@ -6,6 +6,8 @@
  * Time: 14:37
  */
 
+defined('ABSPATH') or die;
+
 $validated_data = $args['validated_data'];
 $user = $args['user'];
 
@@ -43,7 +45,7 @@ $user = $args['user'];
                 <td></td>
                 <td>    <input type="hidden" name="confirm" value="2" >
                     <button type="submit" class="button-primary"> تایید </button>
-                    <button type="submit" form="back" class="button-cancel"> بازگشت </button>
+                    <button type="submit" form="back" class="button-cancel"> ویرایش </button>
                 </td>
             </tr>
             </tbody>

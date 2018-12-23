@@ -7,18 +7,21 @@
  * Time: 12:10
  */
 
+defined('ABSPATH') or die;
+
 $types_trans = [
         'subtraction' => 'برداشت',
         'addition' => 'واریز',
 ];
-var_dump(get_locale());
-var_dump(__('hel','woo-my-wallet-plugin'));
+//var_dump(get_locale());
+//var_dump(__('hel','woo-my-wallet-plugin'));
 ?>
 <div class="wrap" >
 <table border="1" >
     <thead>
     <th>شماره تراکنش</th>
     <th>نام کاربر</th>
+    <th>شناسه کاربری</th>
     <th>ایمیل</th>
     <th>نوع تراکنش</th>
     <th>مبلغ</th>
@@ -36,6 +39,7 @@ var_dump(__('hel','woo-my-wallet-plugin'));
         echo '<tr>';
         echo '<td>' . $transaction->id . '</td>';
         echo '<td>' . $transaction->user->user_nicename . '</td>';
+        echo '<td>' . $transaction->user->ID . '</td>';
         echo '<td>' . $transaction->user->user_email . '</td>';
         echo '<td>' . ((isset($types_trans[$transaction->type])) ? $types_trans[$transaction->type] : 'نامشخص' ). '</td>';
         echo '<td>' . $transaction->amount . '</td>';
@@ -50,4 +54,10 @@ var_dump(__('hel','woo-my-wallet-plugin'));
     }
     ?>
     </tbody>
-</table></div>
+</table>
+
+    <?php
+    //$table = new WP_List_Table();
+     ?>
+</div>
+

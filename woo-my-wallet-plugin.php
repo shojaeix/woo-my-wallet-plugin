@@ -1,7 +1,9 @@
 <?php
 /*
- * Plugin Name:  woo My Wallet
- * Description:  Add wallet to woocommerce users with basic abilities
+ * Plugin Name:  کیف پول من (wMyWallet)
+ * Description:  ایجاد کیف پول برای کاربران ووکامرس،‌ جهت خرید کالا و واریز/برداشت پول
+ * Version: 0.9.0 آزمایشی
+ * Author: امین شجاعی
  * Text Domain: woo-my-wallet-plugin
  * Domain Path: /languages
  */
@@ -9,6 +11,8 @@
  * Root of plugin
  */
 define('wMyWallet_ROOT', __DIR__);
+
+defined('ABSPATH') or die;
 
 //require_once 'vendor/autoload.php';
 // load include directory files, config first
@@ -67,7 +71,7 @@ function wMyWallet_activation()
        `paid_at` DATETIME NULL ,
        `admin_description` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL ,
        `status` VARCHAR(20) NOT NULL ,
-       `user_description` INT NULL ,
+       `user_description` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL ,
         PRIMARY KEY (`id`)
     ) ENGINE = MyISAM CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
     ';
