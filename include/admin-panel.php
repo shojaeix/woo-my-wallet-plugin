@@ -138,20 +138,52 @@ function wMyWallet_main_options_page()
 // new transaction page
 function wmywallet_new_transaction_page()
 {
+
     if (!isset($_GET['user_id']) or !is_numeric($_GET['user_id'])) {
-        //wMyWallet_show_admin_error('ایدی کاربر وارد نشده است.');
-        return wMyWallet_render_template('new_transction_choose_user_form', [], false);
+
+        // search for user
+        if(isset($_GET['field'])){
+            $field = $_GET['field'];
+
+            // by ID
+            if(is_numeric($field)){
+                $user = get_user_by('ID', $field);
+
+            }
+            // by email
+            if(!($user instanceof WP_User) and is_email($field)){
+                echo 'search by email.';
+                $user = get_user_by('email',$field);
+            }
+            // redirect if user found
+            if($user instanceof WP_User){
+                $user_id = $user->get('ID');
+                wp_redirect(get_admin_url() . 'admin.php?page=wmywallet-new-transaction-page&user_id=' . $user_id);
+            } else {
+                wMyWallet_show_admin_error('شناسه وارد شده نامعتبر است.');
+            }
+        }
+        // show choose user form if user not found
+        if(!isset($user_id))
+        {
+            return wMyWallet_render_template('new_transction_choose_user_form', [], false);
+        }
 
     }
-    $user_id = $_GET['user_id'];
+
+    if(!isset($user_id))
+    {
+        $user_id = $_GET['user_id'];
+    }
 
     $user = get_user_by('ID', $user_id);
 
-    if ($user === false) {
+    if (!$user instanceof WP_User) {
         wMyWallet_show_admin_error('ایدی کاربر نامعتبر است.');
         return wMyWallet_render_template('new_transction_choose_user_form', [], false);
 
     }
+    //
     $args = [
         'user' => $user,
     ];
