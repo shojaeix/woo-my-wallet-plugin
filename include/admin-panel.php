@@ -46,13 +46,9 @@ function wMyWallet_add_admin_menu_pages()
         , 'manage_options'
         , 'wmywallet-main-options'
         , 'wMyWallet_main_options_page');
-    // setting
-    add_submenu_page('options', 'تنظیمات کیف پول کاربران', 'تنظیمات'
-        , 'manage_options'
-        , 'wmywallet-main-options'
-        , 'wMyWallet_main_options_page');
 
-    
+
+
 }
 
 /**

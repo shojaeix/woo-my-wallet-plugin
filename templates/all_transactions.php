@@ -11,7 +11,8 @@ $types_trans = [
         'subtraction' => 'برداشت',
         'addition' => 'واریز',
 ];
-
+var_dump(get_locale());
+var_dump(__('hel','woo-my-wallet-plugin'));
 ?>
 <div class="wrap" >
 <table border="1" >

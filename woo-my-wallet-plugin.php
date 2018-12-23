@@ -1,8 +1,10 @@
 <?php
 /*
-Plugin Name:  woo My Wallet
-Description:  Add wallet to woocommerce users with basic abilities
-*/
+ * Plugin Name:  woo My Wallet
+ * Description:  Add wallet to woocommerce users with basic abilities
+ * Text Domain: woo-my-wallet-plugin
+ * Domain Path: /languages
+ */
 /**
  * Root of plugin
  */
@@ -85,5 +87,6 @@ function wMyWallet_deactivation()
     $wpdb->query($sql);
 
 }
+
 
 

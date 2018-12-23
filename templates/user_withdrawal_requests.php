@@ -45,7 +45,7 @@ $statuses_trans = [
     <?php
     if(wMyWallet_short_code_used_page_exist('wMyWallet_withdrawal_request_form_page')){ ?>
         <a href="<?php echo wMyWallet_shortcode_used_page_link('wMyWallet_withdrawal_request_form_page'); ?>" >
-            <button class="button button-primary">➕ درخواست برداشت </button></a>
+            <button class="button button-primary">درخواست برداشت </button></a>
     <?php } ?>
 
     <!--  my wallet transactions button  -->
