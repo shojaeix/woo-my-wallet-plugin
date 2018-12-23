@@ -12,7 +12,7 @@ $requests = isset($args['requests']) ? $args['requests'] : [];
 $records_per_page = 10;
 
 // include the pagination class
-require_once wMyWallet_ROOT . '/vendor/stefangabos/zebra_pagination/Zebra_Pagination.php';
+//require_once wMyWallet_ROOT . '/vendor/stefangabos/zebra_pagination/Zebra_Pagination.php';
 
 // instantiate the pagination object
 $pagination = new Zebra_Pagination();

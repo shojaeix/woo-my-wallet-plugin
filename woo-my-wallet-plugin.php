@@ -10,7 +10,7 @@
  */
 define('wMyWallet_ROOT', __DIR__);
 
-require_once 'vendor/autoload.php';
+//require_once 'vendor/autoload.php';
 // load include directory files, config first
 if (is_file(__DIR__ . '/include/' . 'config.php'))
     require_once(__DIR__ . '/include/' . 'config.php');
@@ -25,8 +25,12 @@ if (count($include_files)) {
 }
 
 
-// load style.css
-//wp_enqueue_style( 'wMyWallet_style', plugins_url(wMyWallet_directory_name . '/style.css') );
+// add scripts
+add_action( 'wp_enqueue_scripts', 'wMyWallet_scripts' );
+function wMyWallet_scripts(){
+    // load style.css
+    wp_enqueue_style( 'wMyWallet_style', plugins_url(wMyWallet_directory_name . '/style.css') );
+}
 
 // Activation
 register_activation_hook(__FILE__, 'wMyWallet_activation');
