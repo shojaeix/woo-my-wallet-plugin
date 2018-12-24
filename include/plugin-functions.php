@@ -4,6 +4,7 @@ defined('ABSPATH') or die;
 
 // ckeck for duplicate
 if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
+    $wMyWallet_functions_loaded = true;
 
     function wMyWallet_insert_new_transaction($user_id, $amount, $type, $old_amount, $new_amount, $description = '', $created_at = null,$order_id = 0)
     {
@@ -37,80 +38,6 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
         }
         return false;
     }
-
-    function wMyWallet_get_wallet_transactions()
-    {
-    }
-
-    function wMyWallet_get_all_transactions()
-    {
-        $transactions = wMyWallet_DBHelper::select('
-        select * from ' . wMyWallet_DBHelper::wpdb()->prefix . wMyWallet_DBHelper::prefix . 'transactions  
-        order by created_at DESC');
-
-        $user_ids = [];
-        foreach ($transactions as $transaction){
-            array_push($user_ids, $transaction->user_id);
-        }
-        $users = wMyWallet_get_users_info($user_ids);
-
-
-        for ($i = 0; $i<count($transactions); $i++){
-            $transactions[$i]->user = $users[$transactions[$i]->user_id];
-        }
-
-        return $transactions;
-    }
-
-    function wMyWallet_get_users_info(array $user_ids){
-        $where = '';
-        $or = false;
-        foreach ($user_ids as $id){
-            if ($or) {
-
-                $where .= ' OR ';
-            } else {
-                $or = true;
-            }
-            $where .= 'ID=' . $id;
-        }
-        $rows = wMyWallet_DBHelper::select('
-        select * from ' . wMyWallet_DBHelper::wpdb()->prefix . 'users 
-        where ' . $where);
-
-        $users = [];
-        foreach ($rows as $object){
-            $users[$object->ID] = $object;
-        }
-        return $users;
-    }
-
-
-    /*
-     function wMyWallet_update_member_balance($user_id, $transaction_id)
-    {
-        // get post meta
-        $amount = get_post_meta($transaction_id, 'amount', TRUE);
-        $type = get_post_meta($transaction_id, 'type', TRUE);
-        $balance = wMyWallet_Wallet::getUserWalletAmount($user_id);
-        // calc new balance
-        $new_balance = ($type == 'add') ? $balance + $amount : $balance - $amount;
-        // update balance
-        update_user_meta($user_id, 'wMyWallet_balance', $new_balance);
-    }
-     */
-
-    /*
-     * Get wMyWallet balance from user metas
-     * @param $user_id
-     * @return int
-
-    function wMyWallet_get_user_balance($user_id)
-    {
-        $balance = wMyWallet_DBHelper::get_user_meta($user_id, 'balance');
-        return (int)$balance;
-    }
-    */
 
     add_action('woocommerce_cart_calculate_fees', 'wMyWallet_add_grant_discount', 999);
     function wMyWallet_add_grant_discount(WC_Cart $cart)
@@ -287,6 +214,4 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
     }
 
 
-
-    $wMyWallet_functions_loaded = true;
 }
