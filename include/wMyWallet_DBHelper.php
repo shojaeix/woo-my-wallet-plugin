@@ -126,6 +126,7 @@ class wMyWallet_DBHelper
         $metas = self::select('
         select * from ' . self::wpdb()->prefix . 'usermeta
             where ' . $condition);
+
         $count = count($metas);
         // true if meta value not found
         if(!$count){
