@@ -190,6 +190,7 @@ function wmywallet_new_transaction_page()
 
     // validation
     $validated = true;
+    $validated_data = [];
     if (!isset($_POST['amount']) or !is_numeric($_POST['amount']) or (int)htmlspecialchars($_POST['amount']) <= 0) {
         if (isset($_POST['amount']))
             wMyWallet_show_admin_error('مقدار تراکنش نامعتبر است.');
@@ -208,18 +209,38 @@ function wmywallet_new_transaction_page()
         $validated = false;
     }
 
-
+    if(isset($_POST['order_id'])){
+        if(!is_numeric($_POST['order_id'])){
+            wMyWallet_show_admin_error('مقدار وارد شده برای شماره سفارش نامعتبر است.');
+            $validated = false;
+        } else {
+            // search for order
+            try {
+                $order = wc_get_order($_POST['order_id']);
+            } catch (Exception $exception) {
+                $order = null;
+            }
+            //  error
+            if (!($order instanceof WC_Order)) {
+                wMyWallet_show_admin_error('شماره سفارش وارد شده نامعتبر است.');
+                $validated = false;
+            } else {
+                $validated_data['order_id'] = $_POST['order_id'];
+            }
+        }
+    } else {
+        $validated_data['order_id'] = 0;
+    }
     // show form if not validated
     if (!$validated or (isset($_POST['edit']) and is_numeric($_POST['edit']) and (int)$_POST['edit'] == 2)) {
         return wMyWallet_render_template('new_transaction_form', $args, false);
     }
 
-    $validated_data = [
-        'amount' => $_POST['amount'],
-        'type' => $_POST['type'],
-        'description' =>$_POST['description'],
-    ];
 
+
+    $validated_data['amount'] = $_POST['amount'];
+    $validated_data['type'] = $_POST['type'];
+    $validated_data['description'] = $_POST['description'];
 
     // confirm
     $confirm = false;
@@ -269,10 +290,14 @@ function wmywallet_new_transaction_page()
         $new_amount,
         $validated_data['description'],
         null,
-        0
+        $validated_data['order_id']
     );
 
     $transaction = wMyWallet_get_transaction($transaction_id);
+    if($validated_data['order_id']){
+        $transaction->order_link = get_edit_post_link($validated_data['order_id']);
+    }
+
     $args = [
         'user' => $user,
         'transaction' => $transaction,
@@ -339,6 +364,9 @@ function wMyWallet_transaction_info()
 
     // return single transaction page if transaction is not a array
     if (!is_array($transaction)) {
+        if($transaction->order_id){
+            $transaction->order_link = get_edit_post_link($transaction->order_id);
+        }
         return
             wMyWallet_render_template('transaction_info', [
                 'user' => get_user_by('id', 1),
