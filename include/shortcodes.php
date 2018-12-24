@@ -205,6 +205,11 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
         ]);
     }
 
+    add_shortcode('wMyWallet_show_my_refferal_code','wMyWallet_show_my_refferal_code');
+    function wMyWallet_show_my_refferal_code(){
+        return wMyWallet_get_referral_code(null);
+    }
+
 
     $wMyWallet_shortcodes_loaded = true;
 }

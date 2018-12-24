@@ -115,4 +115,29 @@ class wMyWallet_DBHelper
     public static function update($table,array $data,array $where){
         return self::instante()->wpdb()->update($table,$data,$where);
     }
+
+    public static function check_unique_meta_value($value,$meta_name = null,$allowed_user_ids = []) : bool {
+
+        $condition = 'meta_value=\'' . $value . '\'';
+        if($meta_name != null){
+            $condition .= ' AND meta_name=\'' . $meta_name . '\'';
+        }
+
+        $metas = self::select('
+        select * from ' . self::wpdb()->prefix . 'usermeta
+            where ' . $condition);
+        $count = count($metas);
+        // true if meta value not found
+        if(!$count){
+            return true;
+        }
+
+        foreach($metas as $meta_object){
+
+            if(!in_array($meta_object->user_id,$allowed_user_ids)){
+                return false;
+            }
+        }
+        return true;
+    }
 }

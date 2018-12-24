@@ -283,4 +283,63 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
         return $users;
     }
 
+    /**
+     * add referral code to user.
+     * @param $user_id
+     */
+    function wMyWallet_add_referral_code_to_user($user_id, $check_pre_code = true){
+
+        // return pre code if exists
+        if ($check_pre_code) {
+            // get pre code
+            $pre_referral_code = wMyWallet_DBHelper::get_user_meta($user_id, 'referral_code');
+            if ($pre_referral_code) {
+                return $pre_referral_code;
+            }
+        }
+
+        // get user object
+        $user = get_user_by('ID',$user_id);
+        // generate new code
+        $new_referral_code = substr($user->user_login,0,3) . $user_id;
+
+        // make code unique
+        while (
+            // check for unique referral value
+            wMyWallet_DBHelper::check_unique_meta_value($new_referral_code,'wMyWallet_referral_code',[$user_id]) == false
+            OR // check for be unique in user logins
+            get_user_by('login',$new_referral_code) != false
+        ){
+            $try = (isset($try) ? ++$try : 1);
+            // generate new code with more login characters, an random
+            $new_referral_code = substr($user->user_login,0,5) . $user_id . rand(1,99)
+                // add try number if tryed more than 10 times (only because of bug resistence)
+                . (($try>10) ? $try : '');
+
+        }
+
+        // save code
+        wMyWallet_DBHelper::save_user_single_meta($user_id,'referral_code',$new_referral_code);
+        return $new_referral_code;
+    }
+
+    /**
+     * get user refferal code with respect to plugin options and current user
+     * @param $user_id
+     * @return mixed|string
+     */
+    function wMyWallet_get_referral_code($user_id = null){
+
+        if(wMyWallet_Options::get('use_special_referral_code')){
+            // return special referral code
+            return wMyWallet_add_referral_code_to_user(((is_null($user_id)) ? get_current_user_id() : $user_id));
+        }
+
+        if($user_id == null or $user_id == get_current_user_id()){
+            // return current user username
+            return get_current_user();
+        }
+        // get user_login from db
+        return get_user_by('ID',$user_id)->user_login;
+    }
 }
