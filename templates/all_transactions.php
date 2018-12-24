@@ -1,4 +1,4 @@
-<h1>لیست تمام تراکنش ها</h1>
+<h1>لیست تراکنش ها</h1>
 <?php
 /**
  * Created by PhpStorm.
@@ -13,10 +13,18 @@ $types_trans = [
         'subtraction' => 'برداشت',
         'addition' => 'واریز',
 ];
-//var_dump(get_locale());
-//var_dump(__('hel','woo-my-wallet-plugin'));
+if(isset($args['user'])){
+    $user = $args['user'];
+}
 ?>
 <div class="wrap" >
+
+    <?php if(isset($user)){ echo "
+    نام کاربر: $user->display_name <br>
+    شناسه کاربر: $user->ID <br>
+   
+    ایمیل: $user->user_email <br><br>
+    "; } ?>
 <table border="1" >
     <thead>
     <th>شماره تراکنش</th>

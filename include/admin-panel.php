@@ -287,31 +287,80 @@ function wmywallet_new_transaction_page()
 // return transaction info
 function wMyWallet_transaction_info()
 {
-    if (!isset($_GET['transaction_id']) or !is_numeric($_GET['transaction_id'])) {
-        // show error only if entered transaction id  is invalid
-        if (isset($_GET['transaction_id'])) {
-            wMyWallet_show_admin_error('شناسه تراکنش نامعتبر است.');
-        } else {
-            return wMyWallet_all_transactions_page();
-        }
-
-        return wMyWallet_render_template('transaction_info_form', [], false);
-
-    }
-
-    $transaction_id = $_GET['transaction_id'];
-
-    $transaction = wMyWallet_get_transaction($transaction_id);
-    if (is_null($transaction)) {
-        wMyWallet_show_admin_error('شناسه تراکنش نامعتبر است.');
-
+    // return all transactions page if search field is empty
+    if (!isset($_GET['search_value']))
         return wMyWallet_all_transactions_page();
-        return wMyWallet_render_template('transaction_info_form', [], false);
+
+    $search_value = $_GET['search_value'];
+    $found = false;
+    // search by transaction id
+    if (is_numeric($search_value)) {
+        $transaction = wMyWallet_get_transaction($search_value);
+        $found = ($transaction != null);
+        if (!$found) {
+            wMyWallet_show_admin_error('تراکنشی با این شماره پیدا نشد.');
+        }
     }
-    return wMyWallet_render_template('transaction_info', [
-        'user' => get_user_by('id', 1),
-        'transaction' => $transaction,
-    ], false);
+    if (!$found and !is_numeric($search_value)) {
+        if (!is_numeric($search_value)) {
+            $users = new WP_User_Query(array(
+                'search' => '*' . esc_attr($search_value) . '*',
+                'search_columns' => array(
+                    'user_nicename',
+                    'user_email',
+                    'display_name',
+                ),
+            ));
+            $users_found = $users->get_results();
+            $count = count($users_found);
+            if ($count === 1) {
+                $found = true;
+                $user = $users_found[0];
+                $transaction = wMyWallet_get_transactions_by('user_id', $user->ID);
+                if (!count($transaction)) {
+                    wMyWallet_show_admin_error('تراکنشی برای کاربر پیدا نشد.');
+                }
+            } else if ($count > 1) {
+                $found = true;
+                $user_ids = [];
+                foreach ($users_found as $user) {
+                    array_push($user_ids, $user->ID);
+                }
+                $transaction = wMyWallet_get_transactions_by('user_id', $user_ids);
+                wMyWallet_show_admin_error('<strong>توجه:</strong> نتیجه جستجو با این عبارت بیشتر از 1 کاربر است.');
+            }
+        }
+    }
+
+    // return form with error if not found
+    if (!$found) {
+        return wMyWallet_all_transactions_page();
+    }
+
+    // return single transaction page if transaction is not a array
+    if (!is_array($transaction)) {
+        return
+            wMyWallet_render_template('transaction_info', [
+                'user' => get_user_by('id', 1),
+                'transaction' => $transaction,
+            ], false);
+    } // return transactions lists if $transaction is array
+    else {
+        for ($i = 0; $i < count($transaction); $i++) {
+            if (isset($transaction[$i]->order_id) and $transaction[$i] > 0) {
+                $transaction[$i]->order_link = get_edit_post_link($transaction[$i]->order_id);
+            }
+        }
+        $args = [
+            'transactions' => $transaction,
+        ];
+        if (isset($users_found) and count($users_found) == 1) {
+            $args['user'] = $user;
+        }
+        return
+            ((!count($transaction)) ? wMyWallet_render_template('transaction_info_form', [], false) : '') .
+            wMyWallet_render_template('all_transactions', $args, false);
+    }
 }
 
 // all transactions page

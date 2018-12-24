@@ -85,15 +85,16 @@ function wMyWallet_deactivation()
 {
     // todo | get confirm from user for delete table
 
-    //  Remove wallet transactions table if user confirmed this
-    global $wpdb;
-    $transactions_table_name = $wpdb->prefix . wMyWallet_DBHelper::prefix . "transactions";
-    $charset_collate = $wpdb->get_charset_collate();
+    if(isset($drop_table) and $drop_table) {
+        //  Remove wallet transactions table if user confirmed this
+        global $wpdb;
+        $transactions_table_name = $wpdb->prefix . wMyWallet_DBHelper::prefix . "transactions";
+        $charset_collate = $wpdb->get_charset_collate();
 
-    $sql = "DROP TABLE IF EXISTS {$transactions_table_name};";
+        $sql = "DROP TABLE IF EXISTS {$transactions_table_name};";
 
-    $wpdb->query($sql);
-
+        $wpdb->query($sql);
+    }
 }
 
 
