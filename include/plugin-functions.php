@@ -214,4 +214,17 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
     }
 
 
+    // add referral code to user on register
+    add_action('user_register','wMyWallet_user_register_action');
+    /**
+     * call add_referral_code_to_user function if use special referral code option was set
+     * @param $user_id
+     */
+    function wMyWallet_user_register_action($user_id){
+        if(wMyWallet_Options::get('use_special_referral_code')){
+            wMyWallet_add_referral_code_to_user($user_id);
+        }
+    }
+
+
 }

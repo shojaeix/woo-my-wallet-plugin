@@ -20,13 +20,16 @@ class wMyWallet_Options
         'withdrawal-min' => 'string',
 
         // pages list
-        'wMyWallet_withdrawal_request_form_page' => 'string',
-        'wMyWallet_my_wallet_transactions_page' => 'string',
-        'wMyWallet_my_withdrawal_requests_page' => 'string',
+        'withdrawal_request_form_page' => 'string',
+        'my_wallet_transactions_page' => 'string',
+        'my_withdrawal_requests_page' => 'string',
+
+        'use_special_referral_code',
     ];
     private static $default_values = [
         'deposit-product-id' => 0,
         'withdrawal-min' => 20000,
+        'use_special_referral_code' => true,
     ];
 
     private static $exist_options_in_db = [];
