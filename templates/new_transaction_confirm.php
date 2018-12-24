@@ -42,6 +42,9 @@ $user = $args['user'];
                 <td>توضیحات</td>
                 <td><input type="text" readonly name="description" value="<?php echo $validated_data['description']; ?>" ></td>
             </tr><tr>
+                <td>شماره سفارش مرتبط</td>
+                <td><input type="text" readonly name="order_id" value="<?php echo $validated_data['order_id']; ?>" ></td>
+            </tr><tr>
                 <td></td>
                 <td>    <input type="hidden" name="confirm" value="2" >
                     <button type="submit" class="button-primary"> تایید </button>

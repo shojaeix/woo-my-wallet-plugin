@@ -11,8 +11,8 @@ defined('ABSPATH') or die;
 <br>
 <h3>انتخاب کاربر</h3>
 <form>
-    آیدی کاربر
-     <input type="text" name="user_id">
     <input name="page" value="wmywallet-new-transaction-page" hidden>
+    آیدی کاربر
+     <input type="text" name="field">
     <button type="submit" class="button-primary">تایید</button>
 </form>

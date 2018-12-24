@@ -202,4 +202,41 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
         return (array_sum($res)%10 == 0);
     }
 
+    function wMyWallet_get_transactions_by($field, $value){
+
+        if(is_array($value)){
+            $condition = ' where ';
+            $colon = false;
+            foreach ($value as $id){
+                if($colon) { $condition .= ' OR '; }
+                else {$colon = true;}
+
+                $condition .= 'user_id=' . $id;
+            }
+
+        } else {
+            $condition = ' where ' . $field . '=\'' . $value . '\'  ';
+        }
+            $transactions = wMyWallet_DBHelper::select('
+        select * from ' . wMyWallet_DBHelper::wpdb()->prefix . wMyWallet_DBHelper::prefix . 'transactions 
+        ' . $condition . '
+        order by created_at DESC');
+
+            if(!is_array($transactions)){
+                return [];
+            }
+            $user_ids = [];
+            foreach ($transactions as $transaction){
+                array_push($user_ids, $transaction->user_id);
+            }
+            $users = wMyWallet_get_users_info($user_ids);
+
+
+            for ($i = 0; $i<count($transactions); $i++){
+                $transactions[$i]->user = $users[$transactions[$i]->user_id];
+            }
+
+            return $transactions;
+
+    }
 }

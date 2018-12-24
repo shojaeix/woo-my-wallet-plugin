@@ -44,6 +44,10 @@ $user = $args['user'];
                 </td>
             </tr>
             <tr>
+                <td>شماره سفارش مرتبط:</td>
+                <td><input type="text" name="order_id" value="<?php echo isset($_POST['order_id']) ? $_POST['order_id'] : ''; ?>" </td>
+            </tr>
+            <tr>
                 <td></td>
                 <td> <button type="submit" class="button button-primary">ایجاد</button>
                     <button type="submit"  form="change_user_id" class="button button-cancel" >تغییر شناسه کاربر</button>
