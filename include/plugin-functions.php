@@ -199,15 +199,16 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
     {
 
         $items = WC()->cart->get_cart_contents();
-        // search for deposit item if items count is more than 1
-        if (count($items) > 1) {
+        // search for deposit item
+        if (count($items) > 0) {
             $deposit_product_id = wMyWallet_Options::get('deposit-product-id');
             /**
              * @item WC_Order_Item_Product
              */
             foreach ($items as $item) {
-                if ($item['product_id'] == $deposit_product_id) {
+                if ($item['product_id'] != $deposit_product_id) {
                     wc_add_notice('شارژ کیف پول همراه با خرید محصولات دیگر امکان پذیر نیست. لطفا شارژ و یا اقلام دیگر را حذف کنید.', 'error');
+                    break;
                 }
             }
         }
