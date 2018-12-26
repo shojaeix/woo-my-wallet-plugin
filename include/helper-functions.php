@@ -35,17 +35,31 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
             }
             return wMyWallet_datetime_to_helical_string(wMyWallet_string_to_datetime($time));
         } catch (Exception $exception){
-            doLog(__FUNCTION__ . $exception->getMessage());
+            wMyWallet_log(__FUNCTION__ . $exception->getMessage());
         }
         return 'date';
     }
-    function doLog($text)
+    function wMyWallet_log($text)
     {
-        echo "<br>" . 'doLog("' . $text . '")';
-        $filename = "dolog.log";
-        $fh = fopen($filename, "a") or die("Could not open log file.");
+        // Show log $text on screen if wordpress debug is active
+        if(defined('WP_DEBUG') and WP_DEBUG)
+        {
+            echo "<br>" . 'wMyWallet log("' . $text . '")' . "<br>";
+        }
+        // open file
+        $filename = wMyWallet_ROOT . "/wMyWallet_log.log";
+        $fh = fopen($filename, "a");
+        // log error and return false if file open failed
+        if(!$fh){
+            error_log('Could not open ' . $filename . ' file.');
+            return false;
+        }
+        // save text on log file
         fwrite($fh, date("d-m-Y, H:i") . " - $text\n") or die("Could not write file!");
+        // close file
         fclose($fh);
+        // everything done
+        return true;
     }
 
     function wMyWallet_get_datetime_string_to_show(DateTime $dateTime)
@@ -142,7 +156,7 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
         try {
             return wMyWallet_DBHelper::insert(wMyWallet_widthrawal_requests_table_name(), $data);
         } catch (Exception $exception) {
-            doLog(__FUNCTION__ . ' failed.' . '$data: ' . json_encode($data) . ' Error: ' . $exception->getMessage());
+            wMyWallet_log(__FUNCTION__ . ' failed.' . '$data: ' . json_encode($data) . ' Error: ' . $exception->getMessage());
         }
         return false;
     }
@@ -330,7 +344,7 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
      */
     function wMyWallet_get_referral_code($user_id = null){
 
-        if(wMyWallet_Options::get('use_special_referral_code')){
+        if(wMyWallet_Options::get('use-special-referral-code')){
             // return special referral code
             return wMyWallet_add_referral_code_to_user(((is_null($user_id)) ? get_current_user_id() : $user_id));
         }
@@ -341,5 +355,100 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
         }
         // get user_login from db
         return get_user_by('ID',$user_id)->user_login;
+    }
+
+    function wMyWallet_get_referral_code_user_id($referral_code, $include_usernames = true){
+
+        $codes = wMyWallet_DBHelper::select('
+        select user_id from ' . wMyWallet_DBHelper::wpdb()->prefix . 'usermeta 
+        where meta_key=\'referral_code\' AND meta_value=\'' . $referral_code . '\'');
+
+        if(count($codes)){
+            return $codes[0]->user_id;
+        }
+        if($include_usernames) {
+            $user = get_user_by('login', $referral_code);
+
+            if ($user instanceof WP_User) {
+                return $user->ID;
+            }
+        }
+
+        return null;
+    }
+
+    function wMyWallet_charge_invited_user_on_register($user_id,$inviter_id = null){
+
+
+        $wallet = wMyWallet_Wallet::getUserWallet($user_id);
+        $invited_user_first_charge_value = (int)wMyWallet_Options::get('invited-user-first-charge');
+
+        if($invited_user_first_charge_value<=0){
+            return;
+        }
+        $old_amount = $wallet->get_amount();
+        // add amount
+        try {
+            $wallet->add_amount($invited_user_first_charge_value);
+            $wallet->save();
+        } catch (Exception $exception){
+            wMyWallet_log(__FUNCTION__ . ' LINE: ' . __LINE__ . ' error: ' . $exception->getMessage());
+            return;
+        }
+
+        $new_amount = $wallet->get_amount();
+        // insert transaction
+        wMyWallet_insert_new_transaction($user_id,$invited_user_first_charge_value,'addition',$old_amount,$new_amount,
+            'شارژ هدیه از طرف معرف'); // todo | add inviter name
+
+
+    }
+
+
+    function wMyWallet_user_completed_orders($user_id = null) {
+        if($user_id == null){
+            $user_id = get_current_user_id();
+        }
+        // Get all customer orders
+        $customer_orders = get_posts( array(
+            //'numberposts' => -1,
+            'meta_key'    => '_customer_user',
+            'meta_value'  => $user_id,
+            'post_type'   => 'shop_order', // WC orders post type
+            'post_status' => 'wc-completed' // Only orders with status "completed"
+        ) );
+
+        return $customer_orders;
+    }
+
+    function wMyWallet_is_order_first_user_order($order_id){
+        $customer_orders = wMyWallet_user_completed_orders();
+        if(isset($customer_orders[0])) // check if array have element
+        {
+            // return false if any none $order_id order is in array
+            foreach ($customer_orders as $order){
+                if($order->ID != $order_id){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    function wMyWallet_is_order_first_user_real_order($order_id){
+        $customer_orders = wMyWallet_user_completed_orders();
+        var_dump($customer_orders);
+        if(isset($customer_orders[0])) // check if array have element
+        {
+            // return false if any none $order_id order is in array
+            foreach ($customer_orders as $order){
+                if($order->ID != $order_id and
+                    get_post_meta($order->ID,wMyWallet_DBHelper::prefix . 'wallet_deposit_order',true) != true
+                ){
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
