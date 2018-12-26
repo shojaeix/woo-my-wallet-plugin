@@ -20,16 +20,20 @@ class wMyWallet_Options
         'withdrawal-min' => 'string',
 
         // pages list
-        'withdrawal_request_form_page' => 'string',
-        'my_wallet_transactions_page' => 'string',
-        'my_withdrawal_requests_page' => 'string',
+        'withdrawal_request_form_page' => 'integer',
+        'my_wallet_transactions_page' => 'integer',
+        'my_withdrawal_requests_page' => 'integer',
 
-        'use_special_referral_code',
+        'use-special-referral-code' => 'bool',
+        'inviter-award-on-user-first-order' => 'integer',
+        'invited-user-first-charge' => 'integer',
     ];
     private static $default_values = [
         'deposit-product-id' => 0,
         'withdrawal-min' => 20000,
-        'use_special_referral_code' => true,
+        'use-special-referral-code' => true,
+        'inviter-award-on-user-first-order' => 8000,
+        'invited-user-first-charge' => 10000,
     ];
 
     private static $exist_options_in_db = [];
@@ -71,10 +75,10 @@ class wMyWallet_Options
      */
     public static function set(string $key, $value)
     {
-        if(self::get($key) == $value){
+
+        if(self::get($key,true) == $value){
             return false;
         }
-
         self::$data[$key] = $value;
 
         if (!isset(self::$exist_options_in_db[$key])) {
@@ -154,10 +158,22 @@ class wMyWallet_Options
      */
     private static function cast_option($key, $value)
     {
-        if (self::$options_list[$key] == 'array' and is_string($value)) {
-            return unserialize($value);
+
+        switch (self::$options_list[$key]){
+            case 'array' :
+                if (is_string($value)) {
+                    return unserialize($value);
+                }
+                break;
+            case 'integer':
+                return (int)$value;
+                break;
+            case 'bool':
+                return (bool)$value;
+                break;
+            default:
+                return $value;
         }
-        return $value;
     }
 
     /**
@@ -170,6 +186,9 @@ class wMyWallet_Options
     {
         if (self::$options_list[$key] == 'array' and !is_string($value)) {
             return serialize($value);
+        }
+        if(is_bool($value)){
+            return (int)$value;
         }
         return $value;
     }
