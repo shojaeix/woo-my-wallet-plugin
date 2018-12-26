@@ -34,7 +34,7 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
         try {
             return wMyWallet_DBHelper::insert(wMyWallet_DBHelper::wpdb()->prefix . wMyWallet_DBHelper::prefix . 'transactions', $data);
         } catch (Exception $exception) {
-            doLog('wMyWallet_insert_new_transaction failed.' . '$data: ' . json_encode($data) . ' Error: ' . $exception->getMessage());
+            wMyWallet_log('wMyWallet_insert_new_transaction failed.' . '$data: ' . json_encode($data) . ' Error: ' . $exception->getMessage());
         }
         return false;
     }
@@ -75,54 +75,41 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
     add_action('woocommerce_payment_complete', 'wMyWallet_grant_discount_order_status_completed');
     function wMyWallet_grant_discount_order_status_completed($order_id)
     {
-        $order = new WC_Order($order_id);
-        // find discount field in order fees and add to $grant_used
-        $order_fees = $order->get_fees();
-        $grant_used = 0;
-        foreach ($order_fees as $order_fee) {
-            $order_fee_data = $order_fee->get_data();
-            if ($order_fee_data['name'] == wMyWallet_discount_title)
-                $grant_used += $order_fee->get_total();
-        }
-        // return if discount not found or it's zero
-        if ($grant_used == 0) return;
-        //create transaction
-        $amount = $grant_used * -1;
-        $description = "کسر هزینه سفارش {$order_id}"
- ;
-        $member_id = get_current_user_id();
-        /*
-        $post = array(
-            'post_content' => $description,
-            'post_title' => $member_id . "_substract_" . $amount . "_" . wMyWallet_get_datetime_string_to_show(new DateTime()),
-            'post_type' => 'wMyWallet_transaction',
-            'post_status' => 'publish',
-            'meta_input' => array(
-                'type' => 'subtract',
-                'amount' => $amount,
-                'member' => $member_id
-            )
-        );
-        $transaction_id = wp_insert_post($post);
-        wMyWallet_update_member_balance($member_id, $transaction_id);
-        update_post_meta($transaction_id, 'balance', wMyWallet_get_member_balance($member_id));
-        */
-        // get user wallet
-        $wallet = wMyWallet_Wallet::getUserWallet($member_id);
-        //  old balance
-        $old_user_balance = $wallet->get_amount();
-        // subtract discount from wallet amount
-        if ($wallet->minus_amount($amount) === false) {
-            // todo | cancel order and add paid amount to wallet
-            doLog('discount subtract failed.');
-            return false;
-        }
-        $wallet->save();
-        //  new balance
-        $new_user_balance = $wallet->get_amount();
+        try {
+            $order = new WC_Order($order_id);
+            // find discount field in order fees and add to $grant_used
+            $order_fees = $order->get_fees();
+            $grant_used = 0;
+            foreach ($order_fees as $order_fee) {
+                $order_fee_data = $order_fee->get_data();
+                if ($order_fee_data['name'] == wMyWallet_discount_title)
+                    $grant_used += $order_fee->get_total();
+            }
+            // return if discount not found or it's zero
+            if ($grant_used == 0) return;
+            //create transaction
+            $amount = $grant_used * -1;
+            $description = "کسر هزینه سفارش {$order_id}";
+            $member_id = get_current_user_id();
+            // get user wallet
+            $wallet = wMyWallet_Wallet::getUserWallet($member_id);
+            //  old balance
+            $old_user_balance = $wallet->get_amount();
+            // subtract discount from wallet amount
+            if ($wallet->minus_amount($amount) === false) {
+                // todo | cancel order and add paid amount to wallet
+                wMyWallet_log('discount subtract failed.');
+                return false;
+            }
+            $wallet->save();
+            //  new balance
+            $new_user_balance = $wallet->get_amount();
 
-        wMyWallet_insert_new_transaction($member_id, $amount, 'subtraction'
-            , $old_user_balance, $new_user_balance, $description,null,$order_id);
+            wMyWallet_insert_new_transaction($member_id, $amount, 'subtraction'
+                , $old_user_balance, $new_user_balance, $description, null, $order_id);
+        } catch (Exception $exception){
+            wMyWallet_log(__FUNCTION__ . ' line: ' . __LINE__ . ' order_id: ' . $order_id .' error:' . $exception->getMessage());
+        }
     }
 
     // deposit by deposit-product
@@ -171,7 +158,7 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
                 $wallet->add_amount($deposit_amount);
                 $wallet->save();
             } catch (Exception $exception) {
-                doLog('error in wallet deposit. Order id = ' . $order_id . ' Error: ' . $exception->getMessage());
+                wMyWallet_log('error in wallet deposit. Order id = ' . $order_id . ' Error: ' . $exception->getMessage());
             }
             $new_amount = $wallet->get_amount();
             // insert new transaction
@@ -185,6 +172,8 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
                 null,
                 $order_id
             );
+            
+            update_post_meta($order_id,wMyWallet_DBHelper::prefix . 'wallet_deposit_order',true);
         }
 
     }
