@@ -7,13 +7,6 @@
  */
 
 defined('ABSPATH') or die;
-if (!isset($args['deposit-product-id'])) {
-    $args['deposit-product-id'] = '';
-}
-if(!isset($args['withdrawal-min'])){
-    $args['withdrawal-min'] = '';
-}
-
 ?>
 
 <h1>تنظیمات «پلاگین کیف پول من»</h1>
@@ -36,8 +29,8 @@ if(!isset($args['withdrawal-min'])){
             <td>صفحه درخواست برداشت</td>
             <td><?php wp_dropdown_pages([
                     'show_option_none' => ' -- ',
-                    'name' => 'wMyWallet_withdrawal_request_form_page',
-                    'selected' => $args['wMyWallet_withdrawal_request_form_page'],
+                    'name' => 'withdrawal_request_form_page',
+                    'selected' => $args['withdrawal_request_form_page'],
             ]); ?>
             </td>
         </tr>
@@ -45,8 +38,8 @@ if(!isset($args['withdrawal-min'])){
             <td>صفحه لیست تراکنش های کیف پول</td>
             <td><?php wp_dropdown_pages([
                     'show_option_none' => ' -- ',
-                    'name' => 'wMyWallet_my_wallet_transactions_page',
-                    'selected' => $args['wMyWallet_my_wallet_transactions_page'],
+                    'name' => 'my_wallet_transactions_page',
+                    'selected' => $args['my_wallet_transactions_page'],
                 ]); ?>
             </td>
         </tr>
@@ -54,14 +47,38 @@ if(!isset($args['withdrawal-min'])){
             <td>صفحه لیست درخواست های برداشت</td>
             <td><?php wp_dropdown_pages([
                     'show_option_none' => ' -- ',
-                    'name' => 'wMyWallet_my_withdrawal_requests_page',
-                    'selected' => $args['wMyWallet_my_withdrawal_requests_page'],
+                    'name' => 'my_withdrawal_requests_page',
+                    'selected' => $args['my_withdrawal_requests_page'],
                 ]); ?>
             </td>
         </tr>
+
+        <tr>
+            <td colspan="2"><h3>تنظیمات زیر مجموعه گیری</h3></td>
+        </tr>
+        <tr>
+            <td>شارژ اولیه کیف پول کاربرانی که با کد معرف ثبت نام میکنند(برای غیر فعال کردن 0 وارد کنید)</td>
+            <td><input name="invited-user-first-charge"  value="<?php echo $args['invited-user-first-charge']; ?>"  type="text"><?php echo ' ' . wMyWallet_get_currency_symbol(); ?></td>
+        </tr>
+        <tr>
+            <td>مژدگانی معرف پس از تکمیل اولین خرید زیر مجموعه(برای غیر فعال کردن 0 وارد کنید)</td>
+            <td><input name="inviter-award-on-user-first-order" value="<?php echo $args['inviter-award-on-user-first-order']; ?>" type="text" ><?php echo ' ' . wMyWallet_get_currency_symbol(); ?></td>
+        </tr>
+        <tr>
+            <td>برای هر کاربر یک کد زیر مجموعه گیری متفاوت با نام کاربری ایجاد شود</td>
+            <td>
+                <input name="use-special-referral-code" type="hidden" value="off" style="display: none">
+               <input name="use-special-referral-code" type="checkbox" value="on"
+                <?php if ($args['use-special-referral-code'] == true) {
+                    echo 'checked';
+                } ?>
+                >
+            </td>
+        </tr>
+        <br>
         <tr>
             <td>
-                <button class="button button-primary" type="submit">تایید</button>
+                <button class="button button-primary" type="submit">بروزرسانی</button>
             </td>
         </tr>
         </tbody>

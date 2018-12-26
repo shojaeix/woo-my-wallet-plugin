@@ -108,31 +108,64 @@ function wMyWallet_main_options_page()
         }
         // set pages
         $pages_list = [
-            'wMyWallet_withdrawal_request_form_page' => 'صفحه درخواست برداشت',
-            'wMyWallet_my_wallet_transactions_page' => 'صفحه لیست تراکنش ها',
-            'wMyWallet_my_withdrawal_requests_page' => 'صفحه لیست درخواست های برداشت',
+            'withdrawal_request_form_page' => 'صفحه درخواست برداشت',
+            'my_wallet_transactions_page' => 'صفحه لیست تراکنش ها',
+            'my_withdrawal_requests_page' => 'صفحه لیست درخواست های برداشت',
         ];
         foreach ($pages_list as $key => $title){
             if(isset($_POST[$key]) and (is_numeric($_POST[$key])  or $_POST[$key] == '' )){
                 $page = (int)$_POST[$key];
                 if(wMyWallet_Options::set($key,$page))
                 {
-                    wMyWallet_show_admin_notice("صفحه «$title» با موفقیت بروزرسانی شد.");
+                    wMyWallet_show_admin_notice("صفحه «" . $title . "» با موفقیت بروزرسانی شد.");
+                } else {
+                    wMyWallet_show_admin_error("بروزرسانی صفحه «" . $title . "» با شکست مواجه شد.");
                 }
             }
         }
+        // referral options -----------------
+
+        // set use-special-referral-code
+        if(isset($_POST['use-special-referral-code'])) {
+            if ($_POST['use-special-referral-code'] == 'on') {
+                wMyWallet_Options::set('use-special-referral-code', true);
+            } else if ($_POST['use-special-referral-code'] == 'off'){
+                wMyWallet_Options::set('use-special-referral-code', false);
+            }
+        }
+        // set inviter-award-on-user-first-order
+        if(isset($_POST['inviter-award-on-user-first-order']) and is_numeric($_POST['inviter-award-on-user-first-order'])){
+            wMyWallet_Options::set('inviter-award-on-user-first-order',(int)$_POST['inviter-award-on-user-first-order']);
+        }
+        // set invited-user-first-charge
+        if(isset($_POST['invited-user-first-charge']) and is_numeric($_POST['invited-user-first-charge'])){
+            wMyWallet_Options::set('invited-user-first-charge',(int)$_POST['invited-user-first-charge']);
+        }
+        // -----------------
 
     } catch (Exception $exception) {
         wMyWallet_show_admin_error($exception->getMessage());
     }
+
+    $args = [];
+    $view_options = [
+        'withdrawal-min',
+        'deposit-product-id',
+        'withdrawal_request_form_page',
+        'my_wallet_transactions_page',
+        'my_withdrawal_requests_page',
+
+        'use-special-referral-code',
+        'inviter-award-on-user-first-order',
+        'invited-user-first-charge',
+    ];
+
+    foreach ($view_options as $option){
+
+        $args[$option] = wMyWallet_Options::get($option);
+    }
     // show template
-    wMyWallet_render_template('main-options', [
-        'deposit-product-id' => wMyWallet_Options::get('deposit-product-id'),
-        'withdrawal-min' => wMyWallet_Options::get('withdrawal-min'),
-        'wMyWallet_withdrawal_request_form_page' => ((bool)(wMyWallet_Options::get('wMyWallet_withdrawal_request_form_page'))) ? wMyWallet_Options::get('wMyWallet_withdrawal_request_form_page') : null,
-        'wMyWallet_my_wallet_transactions_page' =>((bool)(wMyWallet_Options::get('wMyWallet_my_wallet_transactions_page'))) ? wMyWallet_Options::get('wMyWallet_my_wallet_transactions_page') : null,
-        'wMyWallet_my_withdrawal_requests_page' => ((bool)(wMyWallet_Options::get('wMyWallet_my_withdrawal_requests_page'))) ? wMyWallet_Options::get('wMyWallet_my_withdrawal_requests_page') : null,
-    ], false);
+    wMyWallet_render_template('main-options', $args, false);
 }
 
 // new transaction page

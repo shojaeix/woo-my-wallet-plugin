@@ -21,10 +21,12 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
         $count = count($my_transactions);
          for($i=0; $i<$count; $i++){
 
-            if(isset($my_transactions[$i]->order_id))
+            if(isset($my_transactions[$i]->order_id) and $my_transactions[$i]->order_id>0)
             {
-                $order = new WC_Order($my_transactions[$i]->order_id);
-                $my_transactions[$i]->order_link = $order->get_view_order_url();
+                try {
+                    $order = new WC_Order($my_transactions[$i]->order_id);
+                    $my_transactions[$i]->order_link = $order->get_view_order_url();
+                } catch (Exception $exception){ }
             }
         }
 
@@ -168,7 +170,7 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
             }
             $wallet->save();
         } catch (Exception $exception){
-            doLog(__FUNCTION__ . ' error in line ' . __LINE__ . ' Error: ' . $exception->getMessage());
+            wMyWallet_log(__FUNCTION__ . ' error in line ' . __LINE__ . ' Error: ' . $exception->getMessage());
         }
         $new_amount = $wallet->get_amount();
 
@@ -208,6 +210,17 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
     add_shortcode('wMyWallet_show_my_refferal_code','wMyWallet_show_my_refferal_code');
     function wMyWallet_show_my_refferal_code(){
         return wMyWallet_get_referral_code(null);
+    }
+
+    add_shortcode('wMyWallet_my_referral_link','wMyWallet_get_user_referral_link');
+    function wMyWallet_get_user_referral_link(){
+        $url =  wp_registration_url() . '&inviter_code=' . wMyWallet_get_referral_code();
+        return '<a href="' . $url .'" >' . 'لینک' . '</a>';
+    }
+
+    add_shortcode('wMyWallet_my_referral_url','wMyWallet_get_user_referral_url');
+    function wMyWallet_get_user_referral_url(){
+        return wp_registration_url() . '&inviter_code=' . wMyWallet_get_referral_code();
     }
 
 
