@@ -199,31 +199,24 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
     {
 
         $items = WC()->cart->get_cart_contents();
+        $charge_cart_exists = false;
+        $product_exists = false;
         // search for deposit item
-        if (count($items) > 0) {
+        if (count($items) > 1) {
             $deposit_product_id = wMyWallet_Options::get('deposit-product-id');
             /**
              * @item WC_Order_Item_Product
              */
             foreach ($items as $item) {
                 if ($item['product_id'] != $deposit_product_id) {
-                    wc_add_notice('شارژ کیف پول همراه با خرید محصولات دیگر امکان پذیر نیست. لطفا شارژ و یا اقلام دیگر را حذف کنید.', 'error');
-                    break;
+                    $product_exists = true;
+                } else {
+                    $charge_cart_exists = true;
                 }
             }
         }
-    }
-
-
-    // add referral code to user on register
-    add_action('user_register','wMyWallet_user_register_action');
-    /**
-     * call add_referral_code_to_user function if use special referral code option was set
-     * @param $user_id
-     */
-    function wMyWallet_user_register_action($user_id){
-        if(wMyWallet_Options::get('use_special_referral_code')){
-            wMyWallet_add_referral_code_to_user($user_id);
+        if($product_exists and $charge_cart_exists){
+            wc_add_notice('شارژ کیف پول همراه با خرید محصولات دیگر امکان پذیر نیست. لطفا شارژ و یا اقلام دیگر را حذف کنید.', 'error');
         }
     }
 
