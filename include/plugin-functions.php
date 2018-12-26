@@ -172,7 +172,7 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
                 null,
                 $order_id
             );
-            
+
             update_post_meta($order_id,wMyWallet_DBHelper::prefix . 'wallet_deposit_order',true);
         }
 
@@ -210,5 +210,17 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
         }
     }
 
+    add_action('init', 'wMyWallet_start_session', 1);
+    function wMyWallet_start_session() {
+        if(!session_id()) {
+            session_start();
+        }
+    }
+
+    add_action('wp_logout', 'wMyWallet_destroy_session');
+    add_action('wp_login', 'wMyWallet_destroy_session');
+    function wMyWallet_destroy_session() {
+        session_destroy();
+    }
 
 }
