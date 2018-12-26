@@ -199,6 +199,7 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
     {
 
         $items = WC()->cart->get_cart_contents();
+
         $charge_cart_exists = false;
         $product_exists = false;
         // search for deposit item
