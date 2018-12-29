@@ -90,7 +90,7 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
             //create transaction
             $amount = $grant_used * -1;
             $description = "کسر هزینه سفارش {$order_id}";
-            $member_id = get_current_user_id();
+            $member_id = $order->user_id;
             // get user wallet
             $wallet = wMyWallet_Wallet::getUserWallet($member_id);
             //  old balance

@@ -110,9 +110,12 @@
 
     add_action( 'woocommerce_order_status_completed', 'wMyWallet_award_inviter_on_user_first_order', 10);
     function wMyWallet_award_inviter_on_user_first_order($order_id){
-        $is_user_first_order = (bool)wMyWallet_is_order_first_user_real_order($order_id);
+        $order = new WC_Order( $order_id );
+        $user_id = $order->user_id;
 
-        wMyWallet_log('Order ' . $order_id . ' completed' . ' is user first real order: ' . ((int)$is_user_first_order));
+        $is_user_first_order = (bool)wMyWallet_is_order_first_user_real_order($order_id,$user_id);
+
+        //wMyWallet_log('Order ' . $order_id . ' completed' . ' is user first real order: ' . ((int)$is_user_first_order));
 
         if($is_user_first_order){
             // get award value
@@ -122,8 +125,7 @@
                 return false;
             }
 
-            $order = new WC_Order( $order_id );
-            $user_id = $order->user_id;
+
 
             // get inviter user id
             $inviter_user_id = wMyWallet_DBHelper::get_user_meta($user_id,'inviter',false);

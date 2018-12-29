@@ -421,8 +421,8 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
         return $customer_orders;
     }
 
-    function wMyWallet_is_order_first_user_order($order_id){
-        $customer_orders = wMyWallet_user_completed_orders();
+    function wMyWallet_is_order_first_user_order($order_id,$user_id){
+        $customer_orders = wMyWallet_user_completed_orders($user_id);
         if(isset($customer_orders[0])) // check if array have element
         {
             // return false if any none $order_id order is in array
@@ -435,10 +435,16 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
         return true;
     }
 
-    function wMyWallet_is_order_first_user_real_order($order_id){
-        $customer_orders = wMyWallet_user_completed_orders();
+    function wMyWallet_is_order_first_user_real_order($order_id,$user_id){
+        $customer_orders = wMyWallet_user_completed_orders($user_id);
+
         if(isset($customer_orders[0])) // check if array have element
         {
+            try {
+                //wMyWallet_log('user_completed_orders_encode = ' . json_encode($customer_orders));
+            } catch (Exception $exception){
+                wMyWallet_log($exception->getMessage());
+            }
             // return false if any none $order_id order is in array
             foreach ($customer_orders as $order){
                 if($order->ID != $order_id and
