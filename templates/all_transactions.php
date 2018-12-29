@@ -25,6 +25,7 @@ if(isset($args['user'])){
    
     ایمیل: $user->user_email <br><br>
     "; } ?>
+    <!--
 <table border="1" >
     <thead>
     <th>شماره تراکنش</th>
@@ -63,9 +64,56 @@ if(isset($args['user'])){
     ?>
     </tbody>
 </table>
+-->
 
-    <?php
-    //$table = new WP_List_Table();
-     ?>
 </div>
 
+<table class="widefat fixed" cellspacing="0">
+    <thead>
+    <tr>
+        <th id="columnname" class="manage-column column-columnname num" scope="col">شماره تراکنش</th>
+        <th id="columnname" class="manage-column column-columnname" scope="col">نام کاربر</th>
+        <th id="columnname" class="manage-column column-columnname num" scope="col">شناسه کاربری</th>
+        <th id="columnname" class="manage-column column-columnname" scope="col">ایمیل</th>
+        <th id="columnname" class="manage-column column-columnname" scope="col">نوع تراکنش</th>
+        <th id="columnname" class="manage-column column-columnname num" scope="col">مبلغ</th>
+        <th id="columnname" class="manage-column column-columnname" scope="col">زمان</th>
+        <th id="columnname" class="manage-column column-columnname" scope="col">توضیحات</th>
+        <th ></th>
+
+
+    </tr>
+    </thead>
+
+    <tfoot>
+
+    </tfoot>
+
+    <tbody>
+    <?php
+
+    foreach ($transactions as $transaction){
+        if($transaction->id % 2) {
+            echo '<tr>';
+        } else {
+            echo '<tr  class="alternate">';
+        }
+        echo '<td class="column-columnname">' . $transaction->id . '</td>';
+        echo '<td class="column-columnname">' . $transaction->user->user_nicename . '</td>';
+        echo '<td class="column-columnname">' . $transaction->user->ID . '</td>';
+        echo '<td class="column-columnname">' . $transaction->user->user_email . '</td>';
+        echo '<td class="column-columnname">' . ((isset($types_trans[$transaction->type])) ? $types_trans[$transaction->type] : 'نامشخص' ). '</td>';
+        echo '<td class="column-columnname">' . $transaction->amount . '</td>';
+        echo '<td class="column-columnname">' . wMyWallet_helical($transaction->created_at) . '</td>';
+        echo '<td class="column-columnname">' . $transaction->description . '</td>';
+        if(isset($transaction->order_link)){
+            echo '<td class="column-columnname">' . '<a href="' . $transaction->order_link . '" >مشاهده سفارش</a>' . '</td>';
+        } else {
+            echo '<td class="column-columnname"></td>';
+        }
+        echo '</tr>';
+    }
+
+    ?>
+    </tbody>
+</table>
