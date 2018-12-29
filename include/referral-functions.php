@@ -115,7 +115,10 @@
             if($award_value <= 0 ){
                 return false;
             }
-             $user_id = get_current_user_id();
+
+            $order = new WC_Order( $order_id );
+            $user_id = $order->user_id;
+
             // get inviter user id
             $inviter_user_id = wMyWallet_DBHelper::get_user_meta($user_id,'inviter',false);
             // return if user doesn't invited

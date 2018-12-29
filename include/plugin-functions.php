@@ -114,9 +114,14 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
 
     // deposit by deposit-product
     add_action('woocommerce_payment_complete', 'wMyWallet_add_deposit_by_product');
+    add_action( 'woocommerce_order_status_completed', 'wMyWallet_add_deposit_by_product', 10);
     function wMyWallet_add_deposit_by_product($order_id)
     {
-        //$order = new WC_Order($order_id);
+        // check if deposit not added before
+        if(get_post_meta($order_id,wMyWallet_DBHelper::prefix . 'wallet_deposit_order',true) == true){
+            return false;
+        }
+
         $order = wc_get_order($order_id);
         $items = $order->get_items();
 

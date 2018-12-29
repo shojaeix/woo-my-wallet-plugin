@@ -437,7 +437,6 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
 
     function wMyWallet_is_order_first_user_real_order($order_id){
         $customer_orders = wMyWallet_user_completed_orders();
-        var_dump($customer_orders);
         if(isset($customer_orders[0])) // check if array have element
         {
             // return false if any none $order_id order is in array
