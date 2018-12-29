@@ -14,6 +14,11 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
     function wMyWallet_show_my_wallet_transactions()
     {
         $user_id = get_current_user_id();
+        // Return empty if user not logged in
+        if(!$user_id){
+            return '';
+        }
+
         $my_transactions = wMyWallet_DBHelper::select('
         select * from ' . wMyWallet_DBHelper::wpdb()->prefix . wMyWallet_DBHelper::prefix . 'transactions
          where user_id=' . $user_id . ' ORDER BY created_at DESC');
@@ -42,6 +47,10 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
     add_shortcode('wMyWallet_my_wallet_amount', 'wMyWallet_my_wallet_amount');
     function wMyWallet_my_wallet_amount()
     {
+        // Return empty if user not logged in
+        if(!get_current_user_id()){
+            return '';
+        }
         return wMyWallet_Wallet::getUserWalletAmount(get_current_user_id())  . ' ' . get_woocommerce_currency_symbol();
     }
 
@@ -51,7 +60,10 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
     function wMyWallet_show_withdrawal_request_form()
     {
 
-
+        // Return empty if user not logged in
+        if(!get_current_user_id()){
+            return '';
+        }
         $wallet = wMyWallet_Wallet::getUserWallet(get_current_user_id());
 
        //if($wallet->get_amount() < min((int)wMyWallet_Options::get('withdrawal-min'),0)){
@@ -198,6 +210,12 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
     add_shortcode('wMyWallet_my_withdrawal_requests', 'wMyWallet_my_withdrawal_requests');
     function wMyWallet_my_withdrawal_requests()
     {
+
+        // Return empty if user not logged in
+        if(!get_current_user_id()){
+            return '';
+        }
+
         $user_id = get_current_user_id();
         $requests = wMyWallet_DBHelper::select('
         select * from ' . wMyWallet_widthrawal_requests_table_name() . ' where user_id=' . $user_id . ' order by created_at desc');
@@ -209,17 +227,29 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
 
     add_shortcode('wMyWallet_show_my_refferal_code','wMyWallet_show_my_refferal_code');
     function wMyWallet_show_my_refferal_code(){
+        // Return empty if user not logged in
+        if(!get_current_user_id()){
+            return '';
+        }
         return wMyWallet_get_referral_code(null);
     }
 
     add_shortcode('wMyWallet_my_referral_link','wMyWallet_get_user_referral_link');
     function wMyWallet_get_user_referral_link(){
+        // Return empty if user not logged in
+        if(!get_current_user_id()){
+            return '';
+        }
         $url =  wp_registration_url() . '&inviter_code=' . wMyWallet_get_referral_code();
         return '<a href="' . $url .'" >' . 'لینک' . '</a>';
     }
 
     add_shortcode('wMyWallet_my_referral_url','wMyWallet_get_user_referral_url');
     function wMyWallet_get_user_referral_url(){
+        // Return empty if user not logged in
+        if(!get_current_user_id()){
+            return '';
+        }
         return wp_registration_url() . '&inviter_code=' . wMyWallet_get_referral_code();
     }
 
