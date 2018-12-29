@@ -448,6 +448,7 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
                 }
             }
         }
-        return true;
+        // return true if order is not a deposit order
+        return !(get_post_meta($order->ID,wMyWallet_DBHelper::prefix . 'wallet_deposit_order',true));
     }
 }
