@@ -121,7 +121,7 @@ if (!isset($wMyWallet_functions_loaded) or !$wMyWallet_functions_loaded) {
         if(get_post_meta($order_id,wMyWallet_DBHelper::prefix . 'wallet_deposit_order',true) == true){
             return false;
         }
-        
+
         $order = wc_get_order($order_id);
         $items = $order->get_items();
 

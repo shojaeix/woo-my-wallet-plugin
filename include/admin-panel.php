@@ -118,8 +118,6 @@ function wMyWallet_main_options_page()
                 if(wMyWallet_Options::set($key,$page))
                 {
                     wMyWallet_show_admin_notice("صفحه «" . $title . "» با موفقیت بروزرسانی شد.");
-                } else {
-                    wMyWallet_show_admin_error("بروزرسانی صفحه «" . $title . "» با شکست مواجه شد.");
                 }
             }
         }
