@@ -43,10 +43,16 @@
         } catch (Exception $exception){
             wMyWallet_log(__FUNCTION__ . ' line:' . __LINE__ . $exception->getMessage());
         }
-        // todo | create description text base on options
+        // create description text base on options
+        $first_charge_value = (int)wMyWallet_Options::get('invited-user-first-charge');
+        if($first_charge_value){
+            $description = '(در صورتی که کد معرف داشته باشید، ' . $first_charge_value . ' ' . wMyWallet_get_currency_symbol() . ' تومان شارژ رایگان دریافت خواهید کرد)';
+        } else {
+            $description = '';
+        }
         ?>
         <p>
-            <label for="inviter_code">کد معرف(در صورتی که کد معرف داشته باشید، 10 هزار تومان شارژ رایگان دریافت خواهید کرد)<input type="text" name="inviter_code" id="wMyWallet_inviter_code"
+            <label for="inviter_code">کد معرف<?php echo $description; ?><input type="text" name="inviter_code" id="wMyWallet_inviter_code"
                                                   class="input" value="<?php echo $inviter_code; ?>"/></label>
         </p>
         <?PHP
