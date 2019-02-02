@@ -568,3 +568,29 @@ function wMywallet_wallets_list(){
         'users' => $users,
     ],false);
 }
+
+
+// add inviter info to user profile page on admin side
+add_action( 'edit_user_profile', 'extra_user_profile_fields' );
+function extra_user_profile_fields( $user ) {
+    $inviter_data = get_userdata(get_user_meta( $user->ID, 'inviter',true ));
+    ?>
+    <h3><?php _e("اطلاعات معرف", "blank"); ?></h3>
+
+    <table class="form-table">
+        <tr>
+            <th><label for="inviter_nicename"><?php _e("معرف"); ?></label></th>
+            <td>
+                <input disabled type="text" name="inviter_nicename" id="inviter_nicename" value="<?php echo esc_attr($inviter_data->user_nicename); ?>" class="regular-text" /><br />
+                 <span class="description"><?php _e("نام معرف این کاربر"); ?></span>
+            </td>
+        </tr>
+        <tr>
+            <th><label for="inviter_nicename"><?php _e("ایمیل معرف"); ?></label></th>
+            <td>
+                <input disabled type="text" name="inviter_nicename" id="inviter_nicename" value="<?php echo esc_attr($inviter_data->user_email); ?>" class="regular-text" /><br />
+            </td>
+        </tr>
+
+    </table>
+<?php }
