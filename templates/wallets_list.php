@@ -21,7 +21,7 @@
 
 
     // how many records should be displayed on a page?
-    $records_per_page = 2;
+    $records_per_page = 15;
 
     // include the pagination class
     //require_once wMyWallet_ROOT . '/vendor/stefangabos/zebra_pagination/Zebra_Pagination.php';
