@@ -258,7 +258,7 @@ function wmywallet_new_transaction_page()
                 $order = null;
             }
             //  error
-            if (!($order instanceof WC_Order)) {
+            if (!($order instanceof WC_Order) and $_POST['order_id']!=0) {
                 wMyWallet_show_admin_error('شماره سفارش وارد شده نامعتبر است.');
                 $validated = false;
             } else {
