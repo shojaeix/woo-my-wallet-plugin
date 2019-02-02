@@ -43,6 +43,12 @@ function wMyWallet_add_admin_menu_pages()
         , 'wMyWallet-withdrawal-request-info'
         , 'wMyWallet_withdrawal_request_info');
 
+    // wallets list
+    add_submenu_page('wmywallet-main-menu', 'لیست حساب ها', 'مشاهده لیست حساب ها'
+        , 'manage_options'
+        , 'wmywallet-wallets-list'
+        , 'wMywallet_wallets_list');
+
     // setting
     add_submenu_page('wmywallet-main-menu', 'تنظیمات کیف پول کاربران', 'تنظیمات'
         , 'manage_options'
@@ -497,4 +503,68 @@ function wMyWallet_withdrawal_request_info()
         [
             'withdrawal' => $widthrawal,
         ], false);
+}
+
+/**
+ * Show all wallets with an inventory of more than 0
+ */
+function wMywallet_wallets_list(){
+    // get wallets amount
+    $query = "Select meta_value,user_id 
+    from " . wMyWallet_DBHelper::wpdb()->prefix . "usermeta 
+    where meta_key='" . wMyWallet_DBHelper::prefix . "amount' and meta_value>0";
+    $amounts = wMyWallet_DBHelper::select($query);
+    // get users from db
+    $users = [];
+    $users_ids = [];
+    foreach($amounts as $amount){
+        $user = get_user_by('ID',$amount->user_id);
+        $user->amount = $amount->meta_value;
+        array_push($users_ids,$amount->user_id);
+        $users[$user->ID] = $user;
+    }
+    // get users inviter_name
+    $prefix = wMyWallet_DBHelper::wpdb()->prefix;
+
+    $user_id_condition = '(';
+    for($i=0; isset($users_ids[$i]); $i++)
+    {
+        $user_id_condition .= $prefix . "usermeta.user_id=" . $users_ids[$i];
+        if(isset($users_ids[$i+1])) {
+            $user_id_condition .= ' OR ';
+        }
+    }
+    $user_id_condition .= ')';
+    $inviters_query = "
+        select " . $prefix . "users.*, " . $prefix . "usermeta.*, " . $prefix . "usermeta.user_id as invited_user_id
+        from " . $prefix . "users join " . $prefix . "usermeta
+        on " . $prefix . "usermeta.meta_value=" . $prefix . "users.ID
+        where " . $prefix . "usermeta.meta_key='inviter' and " . $prefix . "usermeta.meta_value>0 and " . $user_id_condition;
+    $inviters = wMyWallet_DBHelper::select($inviters_query);
+    foreach($inviters as $inviter){
+        //
+        if(!isset($users[$inviter->invited_user_id])) continue;
+        //
+        $users[$inviter->invited_user_id]->inviter_nicename = $inviter->user_nicename;
+        $users[$inviter->invited_user_id]->inviter_id = $inviter->user_id;
+    }
+    // get users entered inviter code
+     $entered_inviter_codes_query = "
+        select " . $prefix . "usermeta.*
+        from " . $prefix . "usermeta
+        where " . $prefix . "usermeta.meta_key='entered_inviter_code' 
+        and " . $user_id_condition;
+    $entered_inviter_codes = wMyWallet_DBHelper::select($entered_inviter_codes_query);
+    foreach($entered_inviter_codes as $eic){
+        //
+        if(!isset($users[$eic->user_id])) continue;
+        //
+        $users[$eic->user_id]->entered_inviter_code = $eic->meta_value;
+
+    }
+
+     // render template
+    wMyWallet_render_template('wallets_list',[
+        'users' => $users,
+    ],false);
 }
