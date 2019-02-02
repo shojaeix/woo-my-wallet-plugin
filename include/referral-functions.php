@@ -140,7 +140,8 @@
             if(!$inviter_wallet->add_amount($award_value)){
                 return false;
             }
-
+            // save changes
+            $inviter_wallet->save();
             $new_amount = $inviter_wallet->get_amount();
              // insert new transaction
             wMyWallet_insert_new_transaction($inviter_user_id,$award_value,'addition',$old_amount,$new_amount,'مژدگانی شما به دلیل اولین خرید زیر مجموعه');
