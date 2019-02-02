@@ -169,7 +169,7 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
 
     function wMyWallet_get_all_withdrawal_requests(){
         return wMyWallet_DBHelper::select('
-        select * from ' . wMyWallet_DBHelper::wpdb()->prefix . wMyWallet_DBHelper::prefix . 'withdrawal_requests 
+        select * from ' . wMyWallet_DBHelper::wpdb()->prefix . wMyWallet_DBHelper::prefix . 'withdrawal_requests
         order by created_at desc');
     }
 
@@ -232,7 +232,7 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
             $condition = ' where ' . $field . '=\'' . $value . '\'  ';
         }
             $transactions = wMyWallet_DBHelper::select('
-        select * from ' . wMyWallet_DBHelper::wpdb()->prefix . wMyWallet_DBHelper::prefix . 'transactions 
+        select * from ' . wMyWallet_DBHelper::wpdb()->prefix . wMyWallet_DBHelper::prefix . 'transactions
         ' . $condition . '
         order by created_at DESC');
 
@@ -257,7 +257,7 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
     function wMyWallet_get_all_transactions()
     {
         $transactions = wMyWallet_DBHelper::select('
-        select * from ' . wMyWallet_DBHelper::wpdb()->prefix . wMyWallet_DBHelper::prefix . 'transactions  
+        select * from ' . wMyWallet_DBHelper::wpdb()->prefix . wMyWallet_DBHelper::prefix . 'transactions
         order by created_at DESC');
 
         $user_ids = [];
@@ -287,7 +287,7 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
             $where .= 'ID=' . $id;
         }
         $rows = wMyWallet_DBHelper::select('
-        select * from ' . wMyWallet_DBHelper::wpdb()->prefix . 'users 
+        select * from ' . wMyWallet_DBHelper::wpdb()->prefix . 'users
         where ' . $where);
 
         $users = [];
@@ -360,7 +360,7 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
     function wMyWallet_get_referral_code_user_id($referral_code, $include_usernames = true){
 
         $codes = wMyWallet_DBHelper::select('
-        select user_id from ' . wMyWallet_DBHelper::wpdb()->prefix . 'usermeta 
+        select user_id from ' . wMyWallet_DBHelper::wpdb()->prefix . 'usermeta
         where meta_key=\'referral_code\' AND meta_value=\'' . $referral_code . '\'');
 
         if(count($codes)){
@@ -435,7 +435,7 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
         return true;
     }
 
-    function wMyWallet_is_order_first_user_real_order($order_id,$user_id){
+    function wMyWallet_is_order_first_user_real_order($user_id){
         $customer_orders = wMyWallet_user_completed_orders($user_id);
 
         if(isset($customer_orders[0])) // check if array have element
@@ -447,14 +447,38 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
             }
             // return false if any none $order_id order is in array
             foreach ($customer_orders as $order){
-                if($order->ID != $order_id and
+                if(($order->ID != $order_id) and
                     get_post_meta($order->ID,wMyWallet_DBHelper::prefix . 'wallet_deposit_order',true) != true
                 ){
                     return false;
                 }
             }
         }
+
         // return true if order is not a deposit order
         return !(get_post_meta($order->ID,wMyWallet_DBHelper::prefix . 'wallet_deposit_order',true));
+    }
+
+    function wMyWallet_had_user_any_real_order($user_id){
+        $customer_orders = wMyWallet_user_completed_orders($user_id);
+
+        if(isset($customer_orders[0])) // check if array have element
+        {
+            try {
+                //wMyWallet_log('user_completed_orders_encode = ' . json_encode($customer_orders));
+            } catch (Exception $exception){
+                wMyWallet_log($exception->getMessage());
+            }
+            // return false if any none $order_id order is in array
+            foreach ($customer_orders as $order){
+                if(
+                    get_post_meta($order->ID,wMyWallet_DBHelper::prefix . 'wallet_deposit_order',true) != true
+                ){
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }
