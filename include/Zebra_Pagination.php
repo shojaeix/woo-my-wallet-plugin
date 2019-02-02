@@ -78,7 +78,7 @@ class Zebra_Pagination {
         'trailing_slash'            =>  true,
 
         // this is the variable name to be used in the URL for propagating the page number
-        'variable_name'             =>  'page',
+        'variable_name'             =>  'page_number',
 
     );
 
@@ -226,7 +226,6 @@ class Zebra_Pagination {
 
         // should query strings (other than those set in $base_url) be preserved?
         $this->_properties['preserve_query_string'] = $preserve_query_string;
-
     }
 
     /**
@@ -774,7 +773,7 @@ class Zebra_Pagination {
      *
      *  @return void
      */
-    private function _build_uri($page) {
+    public function _build_uri($page) {
 
         // if page propagation method is through SEO friendly URLs
         if ($this->_properties['method'] == 'url') {
