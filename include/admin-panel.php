@@ -300,7 +300,7 @@ function wmywallet_new_transaction_page()
     try {
 
         if ($validated_data['type'] == 'subtraction') {
-            if ($wallet->minus_amount($validated_data['amount']) == false) {
+            if ($wallet->minus_amount($validated_data['amount']) === false) {
                 wMyWallet_show_admin_error('موجودی کیف پول کاربر کافی نیست.' . '(' . $wallet->get_amount() . ')');
                 return wMyWallet_render_template('new_transaction_form', $args, false); // show confirm page
             }
