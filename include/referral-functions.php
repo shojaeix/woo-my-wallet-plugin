@@ -62,20 +62,24 @@
     function wMyWallet_register_form_validation_filter($errors, $sanitized_user_login, $user_email)
     {
 
-
         // check if entered inviter code is actually belongs to any user except "admin" user
         if (isset($_POST['inviter_code']) and strlen($_POST['inviter_code'])) {
                 $referral_code_user_id = wMyWallet_get_referral_code_user_id($_POST['inviter_code'],true);
-            if ($referral_code_user_id == null) {
-                $errors->add('invalid_user_login', 'کد معرف وارد شده نامعتبر است.');
-            }
+
+
+            if (is_null($referral_code_user_id)) {
+                $errors->add('inviter_code_error', 'کد معرف یافت نشد.');
+             }
             // check if entered inviter code is "admin"
             else if($_POST['inviter_code'] == 'admin'){
-                $errors->add('invalid_user_login', 'کد معرف وارد شده غیر فعال است.');
-                }
-           else if (!wMyWallet_had_user_any_real_order($referral_code_user_id)){
-                        $errors->add('invalid_user_login', 'کد معرف نامعتبر است.');
-                }
+                $errors->add('inviter_code_error', 'کد معرف وارد شده غیر فعال است.');
+             }
+            else if (!wMyWallet_had_user_any_real_order($referral_code_user_id)){
+                        $errors->add('inviter_code_error', 'کد معرف  غیر فعال است.
+                        (معرف باید تجربه حداقل یکبار همکاری با ما را داشته باشد)
+                        ');
+
+            }
 
         }
 

@@ -358,10 +358,16 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
     }
 
     function wMyWallet_get_referral_code_user_id($referral_code, $include_usernames = true){
+ 
+        $prepare_query = wMyWallet_DBHelper::wpdb()->prepare(
+        	'
+                select user_id from ' . wMyWallet_DBHelper::wpdb()->prefix . 'usermeta
+                where meta_key=\'referral_code\' AND meta_value=\'%s\'
+        	',
+                $referral_code
+        );
 
-        $codes = wMyWallet_DBHelper::select('
-        select user_id from ' . wMyWallet_DBHelper::wpdb()->prefix . 'usermeta
-        where meta_key=\'referral_code\' AND meta_value=\'' . $referral_code . '\'');
+        $codes = wMyWallet_DBHelper::select($prepare_query);
 
         if(count($codes)){
             return $codes[0]->user_id;
@@ -401,6 +407,11 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
         wMyWallet_insert_new_transaction($user_id,$invited_user_first_charge_value,'addition',$old_amount,$new_amount,
             'شارژ هدیه از طرف معرف'); // todo | add inviter name
 
+            $message = 'مبلغ ' . $invited_user_first_charge_value . ' تومان از طرف معرف شما به عنوان هدیه به کیف پولتان افزوده شد.';
+         if(!isset($_SESSION['messages']) or !is_array($_SESSION['messages'])){
+                 $_SESSION['messages'] = [];
+         }
+          array_push($_SESSION['messages'], $message);
 
     }
 
@@ -435,7 +446,7 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
         return true;
     }
 
-    function wMyWallet_is_order_first_user_real_order($user_id){
+    function wMyWallet_is_order_first_user_real_order($order_id, $user_id){
         $customer_orders = wMyWallet_user_completed_orders($user_id);
 
         if(isset($customer_orders[0])) // check if array have element
