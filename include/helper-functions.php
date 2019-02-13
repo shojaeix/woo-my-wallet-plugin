@@ -387,8 +387,15 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
 
 
         $wallet = wMyWallet_Wallet::getUserWallet($user_id);
-        $invited_user_first_charge_value = (int)wMyWallet_Options::get('invited-user-first-charge');
 
+        // check if user not charged before
+        $charged_for_invite_on_register = (bool)wMyWallet_DBHelper::get_user_meta($user_id,'charged_for_invite_on_register');
+        if($charged_for_invite_on_register){
+            return;
+        }
+        // get first charge value from options
+        $invited_user_first_charge_value = (int)wMyWallet_Options::get('invited-user-first-charge');
+        // return if first charge value is zero
         if($invited_user_first_charge_value<=0){
             return;
         }
@@ -401,6 +408,10 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
             wMyWallet_log(__FUNCTION__ . ' LINE: ' . __LINE__ . ' error: ' . $exception->getMessage());
             return;
         }
+
+        // set charged_for_invite_on_register
+        update_user_meta($user_id,
+            wMyWallet_DBHelper::prefix . 'charged_for_invite_on_register', true);
 
         $new_amount = $wallet->get_amount();
         // insert transaction
