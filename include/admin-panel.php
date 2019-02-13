@@ -147,6 +147,12 @@ function wMyWallet_main_options_page()
         }
         // -----------------
 
+        // set validate_real_orders_for_referral_code
+        if(isset($_POST['validate_real_orders_for_referral_code'])
+            and is_numeric($_POST['validate_real_orders_for_referral_code']))
+        {
+            wMyWallet_Options::set('validate_real_orders_for_referral_code',(bool)$_POST['validate_real_orders_for_referral_code']);
+        }
     } catch (Exception $exception) {
         wMyWallet_show_admin_error($exception->getMessage());
     }
@@ -162,6 +168,7 @@ function wMyWallet_main_options_page()
         'use-special-referral-code',
         'inviter-award-on-user-first-order',
         'invited-user-first-charge',
+        'validate_real_orders_for_referral_code',
     ];
 
     foreach ($view_options as $option){

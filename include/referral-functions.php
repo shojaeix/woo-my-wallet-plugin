@@ -74,12 +74,13 @@
             else if($_POST['inviter_code'] == 'admin'){
                 $errors->add('inviter_code_error', 'کد معرف وارد شده غیر فعال است.');
              }
-            else if (!wMyWallet_had_user_any_real_order($referral_code_user_id)){
+            else if (wMyWallet_Options::get('validate_real_orders_for_referral_code')
+                and !wMyWallet_had_user_any_real_order($referral_code_user_id)){
                         $errors->add('inviter_code_error', 'کد معرف  غیر فعال است.
                         (معرف باید تجربه حداقل یکبار همکاری با ما را داشته باشد)
                         ');
             }
-            
+
             //---- apply wooMyWallet_inviter_code_validation filter
             $errors = apply_filters('wMyWallet_inviter_code_validation', $errors, $_POST['inviter_code']);
             //----
