@@ -78,8 +78,12 @@
                         $errors->add('inviter_code_error', 'کد معرف  غیر فعال است.
                         (معرف باید تجربه حداقل یکبار همکاری با ما را داشته باشد)
                         ');
-
             }
+            
+            //---- apply wooMyWallet_inviter_code_validation filter
+            $errors = apply_filters('wMyWallet_inviter_code_validation', $errors, $_POST['inviter_code']);
+            //----
+
 
         }
 
