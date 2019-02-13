@@ -2,7 +2,7 @@
 /*
  * Plugin Name:  کیف پول من (wMyWallet)
  * Description:  ایجاد کیف پول برای کاربران ووکامرس،‌ جهت خرید کالا و واریز/برداشت پول
- * Version: 0.9.0 آزمایشی
+ * Version: 1.0
  * Author: امین شجاعی
  * Text Domain: woo-my-wallet-plugin
  * Domain Path: /languages
