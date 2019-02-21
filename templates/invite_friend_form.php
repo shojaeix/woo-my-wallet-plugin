@@ -24,13 +24,16 @@
     ?>
     <!-- form inputs -->
     <label for="invite_friend_form_name" >نام شما</label>
-    <input name="wMyWallet_name" id="invite_friend_form_name" class="form-control" type="text">
+    <input name="wMyWallet_name" id="invite_friend_form_name" class="form-control" type="text" value="<?php if(isset($_POST['wMyWallet_name'])) echo htmlspecialchars($_POST['wMyWallet_name']); ?>">
 
     <label for="invite_friend_email" >ایمیل دوست</label>
-    <input name="wMyWallet_friend_email" id="invite_friend_email"  class="form-control" type="text">
+    <input name="wMyWallet_friend_email" id="invite_friend_email"  class="form-control" type="text"
+           value="<?php if(isset($_POST['wMyWallet_friend_email'])) echo htmlspecialchars($_POST['wMyWallet_friend_email']); ?>">
 
     <label for="invite_friend_phone_number"  class="rtl" >شماره موبایل دوست</label>
-    <input name="wMyWallet_friend_phone_number" id="invite_friend_phone_number"  class="form-control" type="text">
+    <input name="wMyWallet_friend_phone_number" id="invite_friend_phone_number"  class="form-control" type="text"
+           value="<?php if(isset($_POST['wMyWallet_friend_phone_number'])) echo htmlspecialchars($_POST['wMyWallet_friend_phone_number']); ?>"
+    >
     <!-- end inputs -->
     <!-- submit button -->
     <button type="submit" class="button button-primary">ارسال دعوتنامه</button>
