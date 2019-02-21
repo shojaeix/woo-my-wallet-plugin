@@ -503,4 +503,10 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
 
         return false;
     }
+    /*
+     * Validate iranian phone number
+     */
+    function wMyWallet_validate_phone_number($phone_number){
+        return preg_match("/^09[0-9]{9}$/", $phone_number);
+    }
 }
