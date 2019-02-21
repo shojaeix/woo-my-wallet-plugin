@@ -257,10 +257,10 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
     add_shortcode('wMyWallet_invite_friend_form', 'wMyWallet_show_and_process_invite_friend_form');
     function wMyWallet_show_and_process_invite_friend_form(){
         $args = [];
+        $errors = [];
         // verify wp nonce
         if(isset($_REQUEST['_wpnonce']) and wp_verify_nonce( $_REQUEST['_wpnonce'], 'wMyWallet-invite-friend'))
         {
-            $errors = [];
             $validated_data = [];
             // validate name
             if(isset($_POST['wMyWallet_name']) and is_string($_POST['wMyWallet_name'])){
@@ -330,6 +330,7 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
 }
 
 function wMyWallet_user_can_send_invite_email_to($user_id, $email) : bool {
+
     return true;
 }
 
