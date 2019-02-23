@@ -148,9 +148,13 @@ class wMyWallet_DBHelper
      * @param $single bool return 1 item on true, return array of items on false
      * @return array of objects|object|null
      */
-    public static function get_data($key, $single = true){
+    public static function get_data($key, $single = true, $value = null){
         // build select query
         $query = "select * from " . wMyWallet_data_table_name() . " where data_key='" . $key . "' ";
+        // add value condition
+        if(!is_null($value)){
+            $query .= " AND data_value='" . $value . "' ";
+        }
         // add limit for single meta
         if($single){
             $query .= " LIMIT 1";
