@@ -525,7 +525,15 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
         return is_null(wMyWallet_DBHelper::get_data('invite-sms-sent-to', true, $phone_number));
     }
 
-    function wMyWallet_send_invite_email($name, $friend_email){}
+    function wMyWallet_send_invite_email($name, $url, $friend_email){
+        $args = [
+                'name' => $name,
+                'url' => $url,
+        ];
+        // send mail
+        return wp_mail($friend_email, 'دعوتنامه از طرف ' . $name
+            , wMyWallet_render_template('invite_friend_mail', $args, true));
+    }
 
     function wMyWallet_send_invite_sms($name, $friend_phone_number){}
 

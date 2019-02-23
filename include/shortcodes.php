@@ -300,8 +300,10 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
 
                     // validate for send email
                      if(wMyWallet_user_can_send_invite_email_to(get_current_user_id(),$validated_data['friend_email'])){
+
+                         $invite_url = wMyWallet_get_user_referral_url();
                          // send mail
-                         wMyWallet_send_invite_email($validated_data['name'], $validated_data['friend_email']);
+                         wMyWallet_send_invite_email($validated_data['name'], $invite_url, $validated_data['friend_email']);
                      } else {
                          array_push($errors, 'امکان ارسال دعوتنامه برای این ایمیل وجود ندارد.');
                      }
