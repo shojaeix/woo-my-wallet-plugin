@@ -7,6 +7,11 @@
  */
 ?>
 
-<?php echo $args['name']; ?> شما را به
+<?php echo $args['name']; ?> شما را به عضویت در
 
+<a href="<?php echo $args['url']; ?>" >
 <?php bloginfo('name'); ?>
+</a>
+
+دعوت کرده است.
+
