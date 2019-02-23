@@ -513,4 +513,19 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
     function wMyWallet_data_table_name(){
         return wMyWallet_DBHelper::wpdb()->prefix . wMyWallet_DBHelper::prefix . 'data';
     }
+
+
+    function wMyWallet_user_can_send_invite_email_to($user_id, $email) : bool {
+
+        return true;
+    }
+
+    function wMyWallet_user_can_send_invite_sms_to($user_id, $phone_number) : bool {
+        return true;
+    }
+
+    function wMyWallet_send_invite_email($name, $friend_email){}
+
+    function wMyWallet_send_invite_sms($name, $friend_phone_number){}
+    
 }

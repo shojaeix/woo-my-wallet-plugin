@@ -329,16 +329,3 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
     //---- end invite friend form
     $wMyWallet_shortcodes_loaded = true;
 }
-
-function wMyWallet_user_can_send_invite_email_to($user_id, $email) : bool {
-
-    return true;
-}
-
-function wMyWallet_user_can_send_invite_sms_to($user_id, $phone_number) : bool {
-    return true;
-}
-
-function wMyWallet_send_invite_email($name, $friend_email){}
-
-function wMyWallet_send_invite_sms($name, $friend_phone_number){}
