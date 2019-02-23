@@ -509,4 +509,8 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
     function wMyWallet_validate_phone_number($phone_number){
         return preg_match("/^09[0-9]{9}$/", $phone_number);
     }
+
+    function wMyWallet_data_table_name(){
+        return wMyWallet_DBHelper::wpdb()->prefix . wMyWallet_DBHelper::prefix . 'data';
+    }
 }
