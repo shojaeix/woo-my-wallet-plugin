@@ -84,8 +84,8 @@ function wMyWallet_activation()
     CREATE TABLE  IF NOT EXISTS ' . $table_name . ' 
     ( `id` INT NOT NULL AUTO_INCREMENT ,
      `type` VARCHAR(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL ,
-     `key` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL ,
-     `value` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL ,
+     `meta_key` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL ,
+     `meta_value` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL ,
      `update_at` DATETIME NULL DEFAULT CURRENT_TIMESTAMP,
      PRIMARY KEY (`id`))
      ENGINE = MyISAM CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;

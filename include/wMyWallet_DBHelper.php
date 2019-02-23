@@ -150,7 +150,7 @@ class wMyWallet_DBHelper
      */
     public static function get_data($key, $single = true){
         // build select query
-        $query = "select * from " . wMyWallet_data_table_name() . " where key='" . $key . "' ";
+        $query = "select * from " . wMyWallet_data_table_name() . " where meta_key='" . $key . "' ";
         // add limit for single meta
         if($single){
             $query .= " LIMIT 1";
@@ -183,7 +183,7 @@ class wMyWallet_DBHelper
         $query = "select * from " . wMyWallet_data_table_name() . " where type='" . $type . "' ";
         // add key condition
         if(!is_null($key)){
-            $query .= " AND key='" . $key . "' ";
+            $query .= " AND meta_key='" . $key . "' ";
         }
         // add limit for single meta
         if($single){
