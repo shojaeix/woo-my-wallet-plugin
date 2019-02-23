@@ -13,6 +13,13 @@
     <?php
     // add wp nonce field
     wp_nonce_field( 'wMyWallet-invite-friend');
+    //++++ show success message
+    foreach ($args['success'] as $success){ ?>
+
+        <div class="alert alert-success" ><?php echo $success; ?></div>
+
+    <?php }
+    //---- end success
     //++++ show errors
     foreach ($args['errors'] as $error){ ?>
 
