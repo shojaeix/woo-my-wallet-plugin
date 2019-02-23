@@ -208,4 +208,21 @@ class wMyWallet_DBHelper
         // return all metas
         return $metas;
     }
+
+    /**
+     * insert new data to data table
+     * @param $key
+     * @param $value
+     * @param null $type
+     * @return int
+     * @throws Exception
+     */
+    public static function set_meta($key, $value, $type = null){
+        $atts = [
+            'key' => $key,
+            'value' => $value,
+            'type' => $type,
+        ];
+        return self::insert(wMyWallet_data_table_name(), $atts);
+    }
 }
