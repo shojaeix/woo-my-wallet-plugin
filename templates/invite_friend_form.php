@@ -35,6 +35,7 @@
            value="<?php if(isset($_POST['wMyWallet_friend_phone_number'])) echo htmlspecialchars($_POST['wMyWallet_friend_phone_number']); ?>"
     >
     <!-- end inputs -->
+    <br /><br />
     <!-- submit button -->
     <button type="submit" class="button button-primary">ارسال دعوتنامه</button>
     <!-- end submit button -->
