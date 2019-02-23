@@ -146,7 +146,7 @@ class wMyWallet_DBHelper
      * get exact key of meta and return all match metas.
      * @param $key string exact key
      * @param $single bool return 1 item on true, return array of items on false
-     * @return array of arrays|array|null
+     * @return array of objects|object|null
      */
     public static function get_data($key, $single = true){
         // build select query
@@ -176,7 +176,7 @@ class wMyWallet_DBHelper
      * @param $type string
      * @param $single bool
      * @param null $key string
-     * @return array of arrays|array|null
+     * @return array of objects|object|null
      */
     public static function get_data_by_type($type, $single = false, $key = null){
         // build select query
