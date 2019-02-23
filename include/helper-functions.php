@@ -535,6 +535,26 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
             , wMyWallet_render_template('invite_friend_mail', $args, true));
     }
 
-    function wMyWallet_send_invite_sms($name, $friend_phone_number){}
+    function wMyWallet_send_invite_sms($name, $friend_phone_number){
+        $text = 'درود. ' . '\r\n' . $name . ' شما را به عضویت در ' . bloginfo('name') . ' دعوت کرده است.';
+
+        return (bool)wMyWallet_send_sms($friend_phone_number, $text);
+    }
+
+    function wMyWallet_send_sms($to_phone_number, $text){
+        if(function_exists('sms')){
+            return sms($to_phone_number, $text);
+        }
+
+        if(class_exists('SMSMessage')) {
+            try {
+                $sms_message = new SMSMessage();
+                return $sms_message->send($text, $to_phone_number);
+            } catch (Exception $exception){
+                wMyWallet_log('Failed to send sms to ' . $to_phone_number . ' using SMSMessage class');
+            }
+        }
+        return false;
+    }
 
 }
