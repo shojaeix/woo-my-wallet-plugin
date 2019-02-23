@@ -516,16 +516,17 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
 
 
     function wMyWallet_user_can_send_invite_email_to($user_id, $email) : bool {
-
-        return true;
+        // check if there is flag of send invite-email to $email
+        return is_null(wMyWallet_DBHelper::get_data('invite-email-sent-to', true, $email));
     }
 
     function wMyWallet_user_can_send_invite_sms_to($user_id, $phone_number) : bool {
-        return true;
+        // check if there is flag of send invite-sms to $phone_number
+        return is_null(wMyWallet_DBHelper::get_data('invite-sms-sent-to', true, $phone_number));
     }
 
     function wMyWallet_send_invite_email($name, $friend_email){}
 
     function wMyWallet_send_invite_sms($name, $friend_phone_number){}
-    
+
 }
