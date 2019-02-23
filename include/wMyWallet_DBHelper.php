@@ -141,4 +141,67 @@ class wMyWallet_DBHelper
         }
         return true;
     }
+
+    /**
+     * get exact key of meta and return all match metas.
+     * @param $key string exact key
+     * @param $single bool return 1 item on true, return array of items on false
+     * @return array of arrays|array|null
+     */
+    public static function get_data($key, $single = true){
+        // build select query
+        $query = "select * from " . wMyWallet_data_table_name() . " where key='" . $key . "' ";
+        // add limit for single meta
+        if($single){
+            $query .= " LIMIT 1";
+        }
+        // execute query and get metas
+        $metas = self::select($query);
+        $count = count($metas);
+
+        // return null if didnt find any match meta
+        if(!$count){
+            return null;
+        }
+        // return single meta
+        if($single){
+            return $metas[0];
+        }
+        // return all metas
+        return $metas;
+    }
+
+    /**
+     * Get metas by type
+     * @param $type string
+     * @param $single bool
+     * @param null $key string
+     * @return array of arrays|array|null
+     */
+    public static function get_data_by_type($type, $single = false, $key = null){
+        // build select query
+        $query = "select * from " . wMyWallet_data_table_name() . " where type='" . $type . "' ";
+        // add key condition
+        if(!is_null($key)){
+            $query .= " AND key='" . $key . "' ";
+        }
+        // add limit for single meta
+        if($single){
+            $query .= " LIMIT 1";
+        }
+        // execute query and get metas
+        $metas = self::select($query);
+        $count = count($metas);
+
+        // return null if didnt find any match meta
+        if(!$count){
+            return null;
+        }
+        // return single meta
+        if($single){
+            return $metas[0];
+        }
+        // return all metas
+        return $metas;
+    }
 }
