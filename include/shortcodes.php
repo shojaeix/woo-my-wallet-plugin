@@ -322,6 +322,7 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
         }
         // pass args to view
         $args['errors'] = $errors;
+        $args['success'] = [];
 
         wMyWallet_render_template('invite_friend_form',$args, false);
     }
