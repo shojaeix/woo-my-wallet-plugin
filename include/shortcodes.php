@@ -240,7 +240,7 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
         if(!get_current_user_id()){
             return '';
         }
-        $url =  wp_registration_url() . '&inviter_code=' . wMyWallet_get_referral_code();
+        $url =  wMyWallet_get_user_referral_url();
         return '<a href="' . $url .'" >' . 'لینک' . '</a>';
     }
 
