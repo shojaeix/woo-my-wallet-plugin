@@ -169,7 +169,7 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
 
     function wMyWallet_get_all_withdrawal_requests(){
         return wMyWallet_DBHelper::select('
-        select * from ' . wMyWallet_DBHelper::wpdb()->prefix . wMyWallet_DBHelper::prefix . 'withdrawal_requests 
+        select * from ' . wMyWallet_DBHelper::wpdb()->prefix . wMyWallet_DBHelper::prefix . 'withdrawal_requests
         order by created_at desc');
     }
 
@@ -232,7 +232,7 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
             $condition = ' where ' . $field . '=\'' . $value . '\'  ';
         }
             $transactions = wMyWallet_DBHelper::select('
-        select * from ' . wMyWallet_DBHelper::wpdb()->prefix . wMyWallet_DBHelper::prefix . 'transactions 
+        select * from ' . wMyWallet_DBHelper::wpdb()->prefix . wMyWallet_DBHelper::prefix . 'transactions
         ' . $condition . '
         order by created_at DESC');
 
@@ -257,7 +257,7 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
     function wMyWallet_get_all_transactions()
     {
         $transactions = wMyWallet_DBHelper::select('
-        select * from ' . wMyWallet_DBHelper::wpdb()->prefix . wMyWallet_DBHelper::prefix . 'transactions  
+        select * from ' . wMyWallet_DBHelper::wpdb()->prefix . wMyWallet_DBHelper::prefix . 'transactions
         order by created_at DESC');
 
         $user_ids = [];
@@ -287,7 +287,7 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
             $where .= 'ID=' . $id;
         }
         $rows = wMyWallet_DBHelper::select('
-        select * from ' . wMyWallet_DBHelper::wpdb()->prefix . 'users 
+        select * from ' . wMyWallet_DBHelper::wpdb()->prefix . 'users
         where ' . $where);
 
         $users = [];
@@ -358,10 +358,16 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
     }
 
     function wMyWallet_get_referral_code_user_id($referral_code, $include_usernames = true){
+ 
+        $prepare_query = wMyWallet_DBHelper::wpdb()->prepare(
+        	'
+                select user_id from ' . wMyWallet_DBHelper::wpdb()->prefix . 'usermeta
+                where meta_key=\'referral_code\' AND meta_value=\'%s\'
+        	',
+                $referral_code
+        );
 
-        $codes = wMyWallet_DBHelper::select('
-        select user_id from ' . wMyWallet_DBHelper::wpdb()->prefix . 'usermeta 
-        where meta_key=\'referral_code\' AND meta_value=\'' . $referral_code . '\'');
+        $codes = wMyWallet_DBHelper::select($prepare_query);
 
         if(count($codes)){
             return $codes[0]->user_id;
@@ -381,8 +387,15 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
 
 
         $wallet = wMyWallet_Wallet::getUserWallet($user_id);
-        $invited_user_first_charge_value = (int)wMyWallet_Options::get('invited-user-first-charge');
 
+        // check if user not charged before
+        $charged_for_invite_on_register = (bool)wMyWallet_DBHelper::get_user_meta($user_id,'charged_for_invite_on_register');
+        if($charged_for_invite_on_register){
+            return;
+        }
+        // get first charge value from options
+        $invited_user_first_charge_value = (int)wMyWallet_Options::get('invited-user-first-charge');
+        // return if first charge value is zero
         if($invited_user_first_charge_value<=0){
             return;
         }
@@ -396,11 +409,20 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
             return;
         }
 
+        // set charged_for_invite_on_register
+        update_user_meta($user_id,
+            wMyWallet_DBHelper::prefix . 'charged_for_invite_on_register', true);
+
         $new_amount = $wallet->get_amount();
         // insert transaction
         wMyWallet_insert_new_transaction($user_id,$invited_user_first_charge_value,'addition',$old_amount,$new_amount,
             'شارژ هدیه از طرف معرف'); // todo | add inviter name
 
+            $message = 'مبلغ ' . $invited_user_first_charge_value . ' تومان از طرف معرف شما به عنوان هدیه به کیف پولتان افزوده شد.';
+         if(!isset($_SESSION['messages']) or !is_array($_SESSION['messages'])){
+                 $_SESSION['messages'] = [];
+         }
+          array_push($_SESSION['messages'], $message);
 
     }
 
@@ -435,7 +457,7 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
         return true;
     }
 
-    function wMyWallet_is_order_first_user_real_order($order_id,$user_id){
+    function wMyWallet_is_order_first_user_real_order($order_id, $user_id){
         $customer_orders = wMyWallet_user_completed_orders($user_id);
 
         if(isset($customer_orders[0])) // check if array have element
@@ -447,14 +469,120 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
             }
             // return false if any none $order_id order is in array
             foreach ($customer_orders as $order){
-                if($order->ID != $order_id and
+                if(($order->ID != $order_id) and
                     get_post_meta($order->ID,wMyWallet_DBHelper::prefix . 'wallet_deposit_order',true) != true
                 ){
                     return false;
                 }
             }
         }
+
         // return true if order is not a deposit order
         return !(get_post_meta($order->ID,wMyWallet_DBHelper::prefix . 'wallet_deposit_order',true));
     }
+
+    function wMyWallet_had_user_any_real_order($user_id){
+        $customer_orders = wMyWallet_user_completed_orders($user_id);
+
+        if(isset($customer_orders[0])) // check if array have element
+        {
+            try {
+                //wMyWallet_log('user_completed_orders_encode = ' . json_encode($customer_orders));
+            } catch (Exception $exception){
+                wMyWallet_log($exception->getMessage());
+            }
+            // return false if any none $order_id order is in array
+            foreach ($customer_orders as $order){
+                if(
+                    get_post_meta($order->ID,wMyWallet_DBHelper::prefix . 'wallet_deposit_order',true) != true
+                ){
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+    /*
+     * Validate iranian phone number
+     */
+    function wMyWallet_validate_phone_number($phone_number){
+        return preg_match("/^09[0-9]{9}$/", $phone_number);
+    }
+
+    function wMyWallet_data_table_name(){
+        return wMyWallet_DBHelper::wpdb()->prefix . wMyWallet_DBHelper::prefix . 'data';
+    }
+
+
+    function wMyWallet_user_can_send_invite_email_to($user_id, $email) : bool {
+        // return false if a user with this email already exists in database
+        if(get_user_by('email', $email)){
+            return false;
+        }
+        //++++ apply filter
+        $errors = new WP_Error();
+        $errors = apply_filters('wMyWallet_user_can_send_invite_email_to', $errors, $user_id, $email);
+        if(count($errors->errors)){
+            return false;
+        }
+        //----
+        // check if there is flag of send invite-email to $email
+        return is_null(wMyWallet_DBHelper::get_data('invite-email-sent-to', true, $email));
+    }
+
+    function wMyWallet_user_can_send_invite_sms_to($user_id, $phone_number) : bool {
+        //++++ validate phone number existence in users phone numbers
+        $args = [
+            'meta_key' => 'phone_number',
+            'meta_value' => $phone_number,
+        ];
+        $users = get_users($args);
+        if(is_array($users) and count($users)){
+            return false;
+        }
+        //----
+        //++++ apply filter
+        $errors = new WP_Error();
+        $errors = apply_filters('wMyWallet_user_can_send_invite_sms_to', $errors, $user_id, $phone_number);
+        if(count($errors->errors)){
+            return false;
+        }
+        //----
+        // check if there is flag of send invite-sms to $phone_number
+        return is_null(wMyWallet_DBHelper::get_data('invite-sms-sent-to', true, $phone_number));
+    }
+
+    function wMyWallet_send_invite_email($name, $url, $friend_email){
+        $args = [
+                'name' => $name,
+                'url' => $url,
+        ];
+        // send mail
+        return wp_mail($friend_email, 'دعوتنامه از طرف ' . $name
+            , wMyWallet_render_template('invite_friend_mail', $args, true));
+    }
+
+    function wMyWallet_send_invite_sms($name, $friend_phone_number){
+        $text = 'درود. ' . '\r\n' . $name . ' شما را به عضویت در ' . bloginfo('name') . ' دعوت کرده است.';
+
+        return (bool)wMyWallet_send_sms($friend_phone_number, $text);
+    }
+
+    function wMyWallet_send_sms($to_phone_number, $text){
+        if(function_exists('sms')){
+             return sms($to_phone_number, $text);
+        }
+
+        if(class_exists('SMSMessage')) {
+            try {
+                $sms_message = new SMSMessage();
+                return $sms_message->send($text, $to_phone_number);
+            } catch (Exception $exception){
+                wMyWallet_log('Failed to send sms to ' . $to_phone_number . ' using SMSMessage class');
+            }
+        }
+        return false;
+    }
+
 }

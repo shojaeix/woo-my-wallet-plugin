@@ -141,4 +141,88 @@ class wMyWallet_DBHelper
         }
         return true;
     }
+
+    /**
+     * get exact key of meta and return all match metas.
+     * @param $key string exact key
+     * @param $single bool return 1 item on true, return array of items on false
+     * @return array of objects|object|null
+     */
+    public static function get_data($key, $single = true, $value = null){
+        // build select query
+        $query = "select * from " . wMyWallet_data_table_name() . " where data_key='" . $key . "' ";
+        // add value condition
+        if(!is_null($value)){
+            $query .= " AND data_value='" . $value . "' ";
+        }
+        // add limit for single meta
+        if($single){
+            $query .= " LIMIT 1";
+        }
+        // execute query and get metas
+        $metas = self::select($query);
+        $count = count($metas);
+
+        // return null if didnt find any match meta
+        if(!$count){
+            return null;
+        }
+        // return single meta
+        if($single){
+            return $metas[0];
+        }
+        // return all metas
+        return $metas;
+    }
+
+    /**
+     * Get metas by type
+     * @param $type string
+     * @param $single bool
+     * @param null $key string
+     * @return array of objects|object|null
+     */
+    public static function get_data_by_type($type, $single = false, $key = null){
+        // build select query
+        $query = "select * from " . wMyWallet_data_table_name() . " where type='" . $type . "' ";
+        // add key condition
+        if(!is_null($key)){
+            $query .= " AND data_key='" . $key . "' ";
+        }
+        // add limit for single meta
+        if($single){
+            $query .= " LIMIT 1";
+        }
+        // execute query and get metas
+        $metas = self::select($query);
+        $count = count($metas);
+
+        // return null if didnt find any match meta
+        if(!$count){
+            return null;
+        }
+        // return single meta
+        if($single){
+            return $metas[0];
+        }
+        // return all metas
+        return $metas;
+    }
+
+    /**
+     * insert new data to data table
+     * @param $key
+     * @param $value
+     * @param null $type
+     * @return int
+     * @throws Exception
+     */
+    public static function set_meta($key, $value, $type = null){
+        $atts = [
+            'key' => $key,
+            'value' => $value,
+            'type' => $type,
+        ];
+        return self::insert(wMyWallet_data_table_name(), $atts);
+    }
 }

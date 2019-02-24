@@ -77,6 +77,18 @@ defined('ABSPATH') or die;
         </tr>
         <br>
         <tr>
+            <td>غیر فعال کردن کد کسانی که قبلا سفارش تکمیل شده نداشتند</td>
+            <td>
+                <input name="validate_real_orders_for_referral_code" type="hidden" value="0" style="display: none">
+                <input name="validate_real_orders_for_referral_code" type="checkbox" value="1"
+                    <?php if ($args['validate_real_orders_for_referral_code'] == true) {
+                        echo 'checked';
+                    } ?>
+                >
+            </td>
+        </tr>
+        <br>
+        <tr>
             <td>
                 <button class="button button-primary" type="submit">بروزرسانی</button>
             </td>

@@ -27,6 +27,7 @@ class wMyWallet_Options
         'use-special-referral-code' => 'bool',
         'inviter-award-on-user-first-order' => 'integer',
         'invited-user-first-charge' => 'integer',
+        'validate_real_orders_for_referral_code' => 'bool',
     ];
     private static $default_values = [
         'deposit-product-id' => 0,

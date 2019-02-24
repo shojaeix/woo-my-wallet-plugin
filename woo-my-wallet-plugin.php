@@ -2,7 +2,7 @@
 /*
  * Plugin Name:  کیف پول من (wMyWallet)
  * Description:  ایجاد کیف پول برای کاربران ووکامرس،‌ جهت خرید کالا و واریز/برداشت پول
- * Version: 0.9.0 آزمایشی
+ * Version: 1.0
  * Author: امین شجاعی
  * Text Domain: woo-my-wallet-plugin
  * Domain Path: /languages
@@ -42,7 +42,7 @@ function wMyWallet_activation()
 {
 
     global $wpdb;
-    // create wallet transactions table if not exists
+    //++++ create wallet transactions table if not exists
     $transactions_table_name = $wpdb->prefix . wMyWallet_DBHelper::prefix . "transactions";
     $charset_collate = $wpdb->get_charset_collate();
 
@@ -60,7 +60,8 @@ function wMyWallet_activation()
     ) $charset_collate;";
 
     wMyWallet_DBHelper::delta_query($sql);
-
+    //---- end transactions table
+    //++++ create widthrawal requests table if not exists
     $table_name = wMyWallet_widthrawal_requests_table_name();
     $widthrawal_requests_table_query = '
     CREATE TABLE  IF NOT EXISTS ' . $table_name . ' 
@@ -76,7 +77,21 @@ function wMyWallet_activation()
     ) ENGINE = MyISAM CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
     ';
     wMyWallet_DBHelper::delta_query($widthrawal_requests_table_query);
-
+    //---- end widthrawals requests
+    //++++ create data table if not exists
+    $table_name = wMyWallet_data_table_name();
+    $data_table_query = '
+    CREATE TABLE  IF NOT EXISTS ' . $table_name . ' 
+    ( `id` INT NOT NULL AUTO_INCREMENT ,
+     `type` VARCHAR(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL ,
+     `data_key` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL ,
+     `data_value` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL ,
+     `update_at` DATETIME NULL DEFAULT CURRENT_TIMESTAMP,
+     PRIMARY KEY (`id`))
+     ENGINE = MyISAM CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+    ';
+    wMyWallet_DBHelper::delta_query($data_table_query);
+    //---- end data table
 }
 
 // Deactivation

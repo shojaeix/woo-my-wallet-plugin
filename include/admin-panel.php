@@ -147,6 +147,12 @@ function wMyWallet_main_options_page()
         }
         // -----------------
 
+        // set validate_real_orders_for_referral_code
+        if(isset($_POST['validate_real_orders_for_referral_code'])
+            and is_numeric($_POST['validate_real_orders_for_referral_code']))
+        {
+            wMyWallet_Options::set('validate_real_orders_for_referral_code',(bool)$_POST['validate_real_orders_for_referral_code']);
+        }
     } catch (Exception $exception) {
         wMyWallet_show_admin_error($exception->getMessage());
     }
@@ -162,6 +168,7 @@ function wMyWallet_main_options_page()
         'use-special-referral-code',
         'inviter-award-on-user-first-order',
         'invited-user-first-charge',
+        'validate_real_orders_for_referral_code',
     ];
 
     foreach ($view_options as $option){
@@ -258,7 +265,7 @@ function wmywallet_new_transaction_page()
                 $order = null;
             }
             //  error
-            if (!($order instanceof WC_Order)) {
+            if (!($order instanceof WC_Order) and $_POST['order_id']!=0) {
                 wMyWallet_show_admin_error('شماره سفارش وارد شده نامعتبر است.');
                 $validated = false;
             } else {
@@ -300,7 +307,7 @@ function wmywallet_new_transaction_page()
     try {
 
         if ($validated_data['type'] == 'subtraction') {
-            if ($wallet->minus_amount($validated_data['amount']) == false) {
+            if ($wallet->minus_amount($validated_data['amount']) === false) {
                 wMyWallet_show_admin_error('موجودی کیف پول کاربر کافی نیست.' . '(' . $wallet->get_amount() . ')');
                 return wMyWallet_render_template('new_transaction_form', $args, false); // show confirm page
             }
@@ -568,3 +575,29 @@ function wMywallet_wallets_list(){
         'users' => $users,
     ],false);
 }
+
+
+// add inviter info to user profile page on admin side
+add_action( 'edit_user_profile', 'extra_user_profile_fields' );
+function extra_user_profile_fields( $user ) {
+    $inviter_data = get_userdata(get_user_meta( $user->ID, 'inviter',true ));
+    ?>
+    <h3><?php _e("اطلاعات معرف", "blank"); ?></h3>
+
+    <table class="form-table">
+        <tr>
+            <th><label for="inviter_nicename"><?php _e("معرف"); ?></label></th>
+            <td>
+                <input disabled type="text" name="inviter_nicename" id="inviter_nicename" value="<?php echo esc_attr($inviter_data->user_nicename); ?>" class="regular-text" /><br />
+                 <span class="description"><?php _e("نام معرف این کاربر"); ?></span>
+            </td>
+        </tr>
+        <tr>
+            <th><label for="inviter_nicename"><?php _e("ایمیل معرف"); ?></label></th>
+            <td>
+                <input disabled type="text" name="inviter_nicename" id="inviter_nicename" value="<?php echo esc_attr($inviter_data->user_email); ?>" class="regular-text" /><br />
+            </td>
+        </tr>
+
+    </table>
+<?php }

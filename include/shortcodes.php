@@ -253,6 +253,102 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
         return wp_registration_url() . '&inviter_code=' . wMyWallet_get_referral_code();
     }
 
+    //++++ invite friend form
+    add_shortcode('wMyWallet_invite_friend_form', 'wMyWallet_show_and_process_invite_friend_form');
+    function wMyWallet_show_and_process_invite_friend_form(){
+        $args = [];
+        $errors = [];
+        $success = [];
+        // verify wp nonce
+        if(isset($_REQUEST['_wpnonce']) and wp_verify_nonce( $_REQUEST['_wpnonce'], 'wMyWallet-invite-friend'))
+        {
+            $validated_data = [];
+            // validate name
+            if(isset($_POST['wMyWallet_name']) and is_string($_POST['wMyWallet_name'])){
+                $name = htmlspecialchars($_POST['wMyWallet_name']);
+                // validate name length
+                if(strlen($name) > 5) {
+                    $validated_data['name'] = $name;
+                } else {
+                    array_push($errors, 'طول نام شما باید حداقل 5 حرف باشد.');
+                }
+            }
+            // validate friend_phone_number
+            if(isset($_POST['wMyWallet_friend_email']) and is_string($_POST['wMyWallet_friend_email'])){
 
+                if(is_email(htmlspecialchars($_POST['wMyWallet_friend_email'])))
+                {
+                    $validated_data['friend_email'] = htmlspecialchars($_POST['wMyWallet_friend_email']);
+                } else {
+                    // add error
+                    array_push($errors,'ایمیل وارد شده نامعتبر است.');
+                }
+            }
+            // validate friend_phone_number
+            if(isset($_POST['wMyWallet_friend_phone_number']) and is_string($_POST['wMyWallet_friend_phone_number'])){
+                $phone_number = htmlspecialchars($_POST['wMyWallet_friend_phone_number']);
+                // validate phone number structure
+                if(wMyWallet_validate_phone_number($phone_number)) {
+                    $validated_data['friend_phone_number'] = $phone_number;
+                } else {
+                    array_push($errors, 'شماره وارد شده نامعتبر است.');
+                }
+            }
+
+            if(isset($validated_data['name'])){
+                // phone number
+                if(isset($validated_data['friend_email'])){
+
+                    // validate for send email
+                     if(wMyWallet_user_can_send_invite_email_to(get_current_user_id(),$validated_data['friend_email'])){
+
+                         $invite_url = wMyWallet_get_user_referral_url();
+                         // send mail
+                         $email_sent = wMyWallet_send_invite_email($validated_data['name'], $invite_url, $validated_data['friend_email']);
+                         if($email_sent){
+                             array_push($success, 'ایمیل دعوت با موفقیت ارسال شد.');
+                             // todo| set send flag
+
+                         } else {
+                             array_push($errors, 'متاسفانه در ارسال ایمیل مشکلی به وجود آمده است. لطفا دقایقی دیگر تلاش کرده و یا با پشتیبانی تماس بگیرید.');
+                         }
+                     } else {
+                         array_push($errors, 'امکان ارسال دعوتنامه برای این ایمیل وجود ندارد.');
+                     }
+
+                }
+                // sms
+                if(isset($validated_data['friend_phone_number'])){
+                    // validate for send sms
+                    if(wMyWallet_user_can_send_invite_sms_to(get_current_user_id(),$validated_data['friend_phone_number'])){
+                        try {
+                            // send sms
+                            $sms_sent = wMyWallet_send_invite_sms($validated_data['name'], $validated_data['friend_phone_number']);
+
+                            if ($sms_sent) {
+                                array_push($success, 'پیامک دعوت با موفقیت ارسال شد.');
+                                // todo| set send flag
+
+                            } else {
+                                array_push($errors, 'متاسفانه ارسال پیامک موفقیت آمیز نبود.');
+                            }
+                        } catch (Exception $exception){
+                            wMyWallet_log($exception->getMessage());
+                            array_push($errors, ' متاسفانه ارسال پیامک به دلیل بروز خطا موفقیت آمیز نبود.');
+                        }
+                    } else {
+                        array_push($errors, 'امکان ارسال دعوتنامه برای این شماره موبایل وجود ندارد.');
+                    }
+
+                }
+            }
+        }
+        // pass args to view
+        $args['errors'] = $errors;
+        $args['success'] = [];
+
+        wMyWallet_render_template('invite_friend_form',$args, false);
+    }
+    //---- end invite friend form
     $wMyWallet_shortcodes_loaded = true;
 }
