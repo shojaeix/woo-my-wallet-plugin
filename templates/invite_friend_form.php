@@ -31,7 +31,8 @@
     ?>
     <!-- form inputs -->
     <label for="invite_friend_form_name" >نام شما</label>
-    <input name="wMyWallet_name" id="invite_friend_form_name" class="form-control" type="text" value="<?php if(isset($_POST['wMyWallet_name'])) echo htmlspecialchars($_POST['wMyWallet_name']); ?>">
+    <input name="wMyWallet_name" id="invite_friend_form_name" class="form-control" type="text"
+           value="<?php if(isset($_POST['wMyWallet_name'])) echo htmlspecialchars($_POST['wMyWallet_name']); ?>">
 
     <label for="invite_friend_email" >ایمیل دوست</label>
     <input name="wMyWallet_friend_email" id="invite_friend_email"  class="form-control" type="text"
@@ -44,6 +45,6 @@
     <!-- end inputs -->
     <br /><br />
     <!-- submit button -->
-    <button type="submit" class="button button-primary">ارسال دعوتنامه</button>
+    <button type="submit" class="button button-primary submit_button">ارسال دعوتنامه</button>
     <!-- end submit button -->
 </form>
