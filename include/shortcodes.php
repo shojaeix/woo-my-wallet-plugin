@@ -258,6 +258,7 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
     function wMyWallet_show_and_process_invite_friend_form(){
         $args = [];
         $errors = [];
+        $success = [];
         // verify wp nonce
         if(isset($_REQUEST['_wpnonce']) and wp_verify_nonce( $_REQUEST['_wpnonce'], 'wMyWallet-invite-friend'))
         {
@@ -303,7 +304,14 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
 
                          $invite_url = wMyWallet_get_user_referral_url();
                          // send mail
-                         wMyWallet_send_invite_email($validated_data['name'], $invite_url, $validated_data['friend_email']);
+                         $email_sent = wMyWallet_send_invite_email($validated_data['name'], $invite_url, $validated_data['friend_email']);
+                         if($email_sent){
+                             array_push($success, 'ایمیل دعوت با موفقیت ارسال شد.');
+                             // todo| set send flag
+
+                         } else {
+                             array_push($errors, 'متاسفانه در ارسال ایمیل مشکلی به وجود آمده است. لطفا دقایقی دیگر تلاش کرده و یا با پشتیبانی تماس بگیرید.');
+                         }
                      } else {
                          array_push($errors, 'امکان ارسال دعوتنامه برای این ایمیل وجود ندارد.');
                      }
@@ -313,8 +321,21 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
                 if(isset($validated_data['friend_phone_number'])){
                     // validate for send sms
                     if(wMyWallet_user_can_send_invite_sms_to(get_current_user_id(),$validated_data['friend_phone_number'])){
-                        // send sms
-                        wMyWallet_send_invite_sms($validated_data['name'], $validated_data['friend_phone_number']);
+                        try {
+                            // send sms
+                            $sms_sent = wMyWallet_send_invite_sms($validated_data['name'], $validated_data['friend_phone_number']);
+
+                            if ($sms_sent) {
+                                array_push($success, 'پیامک دعوت با موفقیت ارسال شد.');
+                                // todo| set send flag
+
+                            } else {
+                                array_push($errors, 'متاسفانه ارسال پیامک موفقیت آمیز نبود.');
+                            }
+                        } catch (Exception $exception){
+                            wMyWallet_log($exception->getMessage());
+                            array_push($errors, ' متاسفانه ارسال پیامک به دلیل بروز خطا موفقیت آمیز نبود.');
+                        }
                     } else {
                         array_push($errors, 'امکان ارسال دعوتنامه برای این شماره موبایل وجود ندارد.');
                     }
