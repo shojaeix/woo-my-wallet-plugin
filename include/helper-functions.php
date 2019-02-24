@@ -559,7 +559,7 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
                 'url' => $url,
         ];
         // send mail
-        return wp_mail($friend_email, 'دعوتنامه از طرف ' . $name
+        return wMyWallet_mail($friend_email, 'دعوتنامه از طرف ' . $name
             , wMyWallet_render_template('invite_friend_mail', $args, true));
     }
 
@@ -585,4 +585,19 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
         return false;
     }
 
+    function wMyWallet_mail($to, $subject, $message){
+        // send using send_wMyWallet_mails
+        if(function_exists('send_wMyWallet_mails')){
+            try{
+                return send_wMyWallet_mails($to, $subject, $message);
+            } catch (Exception $exception){
+                wMyWallet_log('Error on sending mail using send_wMyWallet_mails function: '
+                    . $exception->getMessage());
+            }
+        } else {
+            // send using wp_mail
+            return wp_mail($to, $subject,$message);
+        }
+        return false;
+    }
 }
