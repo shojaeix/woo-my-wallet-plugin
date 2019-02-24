@@ -516,11 +516,39 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
 
 
     function wMyWallet_user_can_send_invite_email_to($user_id, $email) : bool {
+        // return false if a user with this email already exists in database
+        if(get_user_by('email', $email)){
+            return false;
+        }
+        //++++ apply filter
+        $errors = new WP_Error();
+        $errors = apply_filters('wMyWallet_user_can_send_invite_email_to', $errors, $user_id, $email);
+        if(count($errors->errors)){
+            return false;
+        }
+        //----
         // check if there is flag of send invite-email to $email
         return is_null(wMyWallet_DBHelper::get_data('invite-email-sent-to', true, $email));
     }
 
     function wMyWallet_user_can_send_invite_sms_to($user_id, $phone_number) : bool {
+        //++++ validate phone number existence in users phone numbers
+        $args = [
+            'meta_key' => 'phone_number',
+            'meta_value' => $phone_number,
+        ];
+        $users = get_users($args);
+        if(is_array($users) and count($users)){
+            return false;
+        }
+        //----
+        //++++ apply filter
+        $errors = new WP_Error();
+        $errors = apply_filters('wMyWallet_user_can_send_invite_sms_to', $errors, $user_id, $phone_number);
+        if(count($errors->errors)){
+            return false;
+        }
+        //----
         // check if there is flag of send invite-sms to $phone_number
         return is_null(wMyWallet_DBHelper::get_data('invite-sms-sent-to', true, $phone_number));
     }
@@ -543,7 +571,7 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
 
     function wMyWallet_send_sms($to_phone_number, $text){
         if(function_exists('sms')){
-            return sms($to_phone_number, $text);
+             return sms($to_phone_number, $text);
         }
 
         if(class_exists('SMSMessage')) {
