@@ -315,7 +315,8 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
                          $email_sent = wMyWallet_send_invite_email($validated_data['name'], $invite_url, $validated_data['friend_email']);
                          if($email_sent){
                              array_push($success, 'ایمیل دعوت با موفقیت ارسال شد.');
-                             // todo| set send flag
+                             //  set send flag
+                             wMyWallet_DBHelper::set_data('invite-email-sent-to', $validated_data['friend_email'], false);
 
                          } else {
                              array_push($errors, 'متاسفانه در ارسال ایمیل مشکلی به وجود آمده است. لطفا دقایقی دیگر تلاش کرده و یا با پشتیبانی تماس بگیرید.');
@@ -335,7 +336,8 @@ if(!isset($wMyWallet_shortcodes_loaded) or !$wMyWallet_shortcodes_loaded){
 
                             if ($sms_sent) {
                                 array_push($success, 'پیامک دعوت با موفقیت ارسال شد.');
-                                // todo| set send flag
+                                // set send flag
+                                wMyWallet_DBHelper::set_data('invite-sms-sent-to', $validated_data['friend_phone_number'], false);
 
                             } else {
                                 array_push($errors, 'متاسفانه ارسال پیامک موفقیت آمیز نبود.');
