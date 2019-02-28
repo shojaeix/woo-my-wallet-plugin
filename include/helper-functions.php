@@ -362,7 +362,7 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
         $prepare_query = wMyWallet_DBHelper::wpdb()->prepare(
         	'
                 select user_id from ' . wMyWallet_DBHelper::wpdb()->prefix . 'usermeta
-                where meta_key=\'referral_code\' AND meta_value=\'%s\'
+                where meta_key=\'referral_code\' AND meta_value=%s
         	',
                 $referral_code
         );
@@ -586,6 +586,7 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
     }
 
     function wMyWallet_mail($to, $subject, $message){
+
         // send using send_wMyWallet_mails
         if(function_exists('send_wMyWallet_mails')){
             try{
@@ -595,9 +596,12 @@ if (!isset($wMyWallet_helper_functions_loaded) or !$wMyWallet_helper_functions_l
                     . $exception->getMessage());
             }
         } else {
+            wMyWallet_log('wMyWallet_mail fail in send mail');
             // send using wp_mail
             return wp_mail($to, $subject,$message);
         }
+
         return false;
+
     }
 }
