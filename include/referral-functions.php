@@ -98,27 +98,43 @@
     add_action('user_register', 'wMyWallet_process_inviter_code_on_register');
     function wMyWallet_process_inviter_code_on_register($user_id)
     {
+
+        // get inviter_code from $_POST
         if (isset($_POST['inviter_code']) and
-            (is_string($_POST['inviter_code']) or is_numeric($_POST['inviter_code'])) and
+            (is_string($_POST['inviter_code'])
+                or is_numeric($_POST['inviter_code'])) and
             strlen($_POST['inviter_code'])) {
             $inviter_code = htmlspecialchars($_POST['inviter_code']);
-
-
-            // check for code existentse
-            $inviter = wMyWallet_get_referral_code_user_id($inviter_code);
-            if ($inviter == null) {
-                return;
-            }
-            // check if user is not self inviter
-            if ($inviter_code == $user_id) {
-                return;
-            }
-            // save inviter id
-            wMyWallet_DBHelper::save_user_single_meta($user_id, 'inviter', $inviter, false);
-            wMyWallet_DBHelper::save_user_single_meta($user_id, 'entered_inviter_code', $inviter_code, false);
-
-            wMyWallet_charge_invited_user_on_register($user_id, $inviter);
         }
+        // get inviter_code from $_GET
+        else if(isset($_GET['inviter_code']) and
+            (
+                    is_string($_GET['inviter_code'])
+                or is_numeric($_GET['inviter_code'])
+            ) and
+            strlen($_GET['inviter_code'])) {
+            $inviter_code = htmlspecialchars($_GET['inviter_code']);
+        }
+        // return if inviter_code not found
+        else {
+            return;
+        }
+
+        // check for code existentse
+        $inviter = wMyWallet_get_referral_code_user_id($inviter_code);
+        if ($inviter == null) {
+            return;
+        }
+        // check if user is not self inviter
+        if ($inviter_code == $user_id) {
+            return;
+        }
+        // save inviter id
+        wMyWallet_DBHelper::save_user_single_meta($user_id, 'inviter', $inviter, false);
+        wMyWallet_DBHelper::save_user_single_meta($user_id, 'entered_inviter_code', $inviter_code, false);
+
+        wMyWallet_charge_invited_user_on_register($user_id, $inviter);
+
     }
 
 
