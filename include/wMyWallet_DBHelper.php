@@ -176,6 +176,23 @@ class wMyWallet_DBHelper
     }
 
     /**
+     * set data
+     */
+    public static function set_data($key, $value, bool $insert_only_if_not_exists){
+        // return if insert_only)if_not_exists argument is true and key&value exists in db
+        if($insert_only_if_not_exists){
+            if(self::get_data($key,true, $value)){
+                return false;
+            }
+        }
+       // insert
+        return (bool)self::wpdb()->insert(wMyWallet_data_table_name(), [
+            'data_key' => $key,
+            'data_value' => $value,
+        ]);
+    }
+
+    /**
      * Get metas by type
      * @param $type string
      * @param $single bool
